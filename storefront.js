@@ -26,16 +26,8 @@ const bootMonitor = window.__TAYYA_BOOT = window.__TAYYA_BOOT || {
 };
 bootMonitor.started = true;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBMDwwgiZ1i7jgysd3ez3Pnn7DgT80LGd8",
-  authDomain: "mandoos-store.firebaseapp.com",
-  projectId: "mandoos-store",
-  storageBucket: "mandoos-store.appspot.com",
-  messagingSenderId: "572507274540",
-  appId: "1:572507274540:web:180969443265858c5c0089"
-};
-
-const IMGBB_API_KEY = "c64b9f1f74b140d011adea18a5257a69";
+const firebaseConfig = window.TAYYA_FIREBASE_CONFIG || null;
+const IMGBB_API_KEY = window.TAYYA_IMGBB_API_KEY || "";
 const ADMIN_EMAILS = ["admin@tayya.om"];
 const ADMIN_PHONES = [];
 const LOCAL_PHONE_OTP = "123456";
@@ -520,6 +512,10 @@ async function hydrateRemoteState() {
 }
 
 async function initFirebase() {
+  if (!firebaseConfig?.apiKey) {
+    return useLocalFirebaseFallback();
+  }
+
   try {
     const [firebaseApp, firebaseAuth, firebaseDb] = await Promise.all([
       import("https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js"),
@@ -569,17 +565,22 @@ async function initFirebase() {
       await renderPage();
     });
   } catch (error) {
-    state.firebaseReady = false;
-    state.auth = null;
-    state.db = null;
-    if (!state.products.length) state.products = DEMO_PRODUCTS.map((item) => normalizeProduct(item));
-    if (!state.accounts.length) state.accounts = DEMO_ACCOUNTS.map((item) => normalizeAccount(item));
-    saveJson(KEYS.productsCache, state.products);
-    saveJson(KEYS.accountsCache, state.accounts);
+    useLocalFirebaseFallback();
     notify("تم تشغيل المتجر بوضع محلي احتياطي لأن Firebase غير متاح الآن", "error");
     return false;
   }
   return true;
+}
+
+function useLocalFirebaseFallback() {
+  state.firebaseReady = false;
+  state.auth = null;
+  state.db = null;
+  if (!state.products.length) state.products = DEMO_PRODUCTS.map((item) => normalizeProduct(item));
+  if (!state.accounts.length) state.accounts = DEMO_ACCOUNTS.map((item) => normalizeAccount(item));
+  saveJson(KEYS.productsCache, state.products);
+  saveJson(KEYS.accountsCache, state.accounts);
+  return false;
 }
 
 async function loadProducts(force = false) {
@@ -7371,6 +7372,11 @@ function collectGallery(item) {
 }
 
 async function uploadFiles(files) {
+  if (!IMGBB_API_KEY) {
+    notify("Image upload is disabled until a private upload endpoint is configured.", "error");
+    return [];
+  }
+
   const results = [];
   for (const file of files) {
     const compressed = await compressImageFile(file);

@@ -7,6 +7,7 @@ let signOut;
 let updateProfile;
 let sendPasswordResetEmail;
 let GoogleAuthProvider;
+let FacebookAuthProvider;
 let signInWithPopup;
 let signInWithPhoneNumber;
 let RecaptchaVerifier;
@@ -469,12 +470,7 @@ function migrateStoreIdentity() {
 }
 
 function shouldShowStoreIntro() {
-  if (route !== "home") return false;
-  try {
-    return sessionStorage.getItem(SESSION_KEYS.introSeen) !== "1";
-  } catch {
-    return true;
-  }
+  return false;
 }
 
 function markStoreIntroSeen() {
@@ -531,6 +527,7 @@ async function initFirebase() {
     updateProfile = firebaseAuth.updateProfile;
     sendPasswordResetEmail = firebaseAuth.sendPasswordResetEmail;
     GoogleAuthProvider = firebaseAuth.GoogleAuthProvider;
+    FacebookAuthProvider = firebaseAuth.FacebookAuthProvider;
     signInWithPopup = firebaseAuth.signInWithPopup;
     signInWithPhoneNumber = firebaseAuth.signInWithPhoneNumber;
     RecaptchaVerifier = firebaseAuth.RecaptchaVerifier;
@@ -649,8 +646,8 @@ function renderShell() {
   const hero = getHeroData();
   const adminNav = isAdmin() ? '<a href="admin.html" class="' + (route.startsWith("admin") ? "is-active" : "") + '">' + escapeHtml(t("admin", "الأدمن")) + "</a>" : "";
   const ribbonText = state.language === "en"
-    ? `Free shipping over ${FREE_SHIPPING_THRESHOLD} OMR • Multi-page store • Flexible checkout${state.firebaseReady ? "" : " • Local fallback mode"}`
-    : state.contentSettings.topRibbon + (state.firebaseReady ? "" : " • وضع محلي احتياطي مفعل");
+    ? `Free shipping over ${FREE_SHIPPING_THRESHOLD} OMR • Multi-page store • Flexible checkout`
+    : state.contentSettings.topRibbon;
   app.innerHTML = [
     '<div class="store-shell">',
     '  <div class="top-ribbon"><div class="top-ribbon__inner">' + escapeHtml(ribbonText) + "</div></div>",
@@ -694,7 +691,7 @@ function renderShell() {
     "      </div>",
     "    </div>",
     "  </nav>",
-    '  <main class="page-shell">',
+    '  <main class="page-shell page-shell--' + escapeHtml(route) + '">',
     '    <div class="breadcrumbs">' + renderBreadcrumbs() + "</div>",
     '    <section class="page-hero">',
     '      <div class="page-hero__grid">',
@@ -5484,7 +5481,7 @@ async function handleClick(event) {
   }
 
   if (target.hasAttribute("data-social-login")) {
-    await loginWithGoogle();
+    await loginWithProvider(target.getAttribute("data-social-login") || "google");
     return;
   }
 
@@ -6480,6 +6477,32 @@ async function loginWithGoogle() {
     saveJson(KEYS.localUser, state.user);
     syncCustomerProfileFromUser(state.user);
     notify("تم تسجيل دخول محلي تجريبي");
+  }
+  window.location.href = "account.html";
+}
+
+async function loginWithProvider(providerName = "google") {
+  const normalized = String(providerName || "google").toLowerCase();
+  const isFacebook = normalized === "facebook";
+  const Provider = isFacebook ? FacebookAuthProvider : GoogleAuthProvider;
+  const label = isFacebook ? "Facebook" : "Google";
+
+  if (state.firebaseReady && state.auth && Provider && signInWithPopup) {
+    const provider = new Provider();
+    const result = await signInWithPopup(state.auth, provider);
+    state.user = normalizeAuthUser(result.user);
+    saveJson(KEYS.localUser, state.user);
+    syncCustomerProfileFromUser(state.user);
+    notify(`تم تسجيل الدخول عبر ${label}`);
+  } else {
+    state.user = {
+      email: `local-${normalized}@tayya.om`,
+      displayName: `${label} Demo`,
+      providerIds: [`local-${normalized}`]
+    };
+    saveJson(KEYS.localUser, state.user);
+    syncCustomerProfileFromUser(state.user);
+    notify(`تم تسجيل دخول محلي تجريبي عبر ${label}`);
   }
   window.location.href = "account.html";
 }
@@ -7982,4 +8005,232 @@ function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(() => null);
   }
+}
+
+function renderHomePageV3() {
+  const products = getVisibleProducts();
+  const featured = [...products].sort((a, b) => getPopularityScore(b) - getPopularityScore(a));
+  const heroItem = featured[0] || products[0] || DEMO_PRODUCTS[0];
+  const heroImage = heroItem?.imgUrl || heroItem?.gallery?.[0] || "icon.svg";
+  const categories = buildModernHomeCategories(products, heroImage);
+
+  return `
+    <section class="tayya-home">
+      <section class="tayya-hero">
+        <div class="tayya-hero__copy">
+          <span class="tayya-kicker">متجر طيّة</span>
+          <h1>متجر عماني فاخر لتجربة متعددة الصفحات</h1>
+          <p>تجربة تسوق هادئة وسريعة لمنتجات مختارة بعناية، مع واجهة أوضح للجوال واللابتوب ومسار شراء مباشر.</p>
+          <div class="hero-actions tayya-hero__actions">
+            <a class="primary-button" href="kummah.html">تسوق الآن</a>
+            <a class="ghost-button" href="about.html">من نحن</a>
+          </div>
+          <div class="tayya-hero__trust">
+            <span><i class="fas fa-shield-heart"></i> دفع آمن</span>
+            <span><i class="fas fa-truck-fast"></i> شحن سريع</span>
+            <span><i class="fas fa-headset"></i> دعم 24/7</span>
+          </div>
+        </div>
+        <figure class="tayya-hero__visual">
+          <img src="${escapeHtml(heroImage)}" alt="${escapeHtml(heroItem?.name || "منتج مختار من طيّة")}">
+          <figcaption>
+            <span>مختار اليوم</span>
+            <strong>${escapeHtml(heroItem?.name || "قطعة مختارة")}</strong>
+            <small>${formatPrice(heroItem?.price || 0)}</small>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="tayya-category-showcase" aria-label="تسوق حسب الفئة">
+        <div class="section-head section-head--center">
+          <div>
+            <h2>تسوق حسب الفئة</h2>
+            <p>الأقسام الأساسية في مساحة أخف وأسهل للمس.</p>
+          </div>
+        </div>
+        <div class="tayya-category-grid">
+          ${categories.map(renderModernHomeCategory).join("")}
+        </div>
+      </section>
+
+      <section class="tayya-feature-band">
+        <article><i class="fas fa-gem"></i><strong>منتجات أصلية</strong><span>اختيارات منتقاة بعناية</span></article>
+        <article><i class="fas fa-wallet"></i><strong>دفع مرن</strong><span>تجربة دفع واضحة</span></article>
+        <article><i class="fas fa-mobile-screen"></i><strong>جاهز للجوال</strong><span>مقاسات أهدأ وتنقل أسرع</span></article>
+        <article><i class="fas fa-box-open"></i><strong>طلبات منظمة</strong><span>سلة وحساب وتتبع مستقل</span></article>
+      </section>
+    </section>
+  `;
+}
+
+function buildModernHomeCategories(products, fallbackImage) {
+  const findByCategory = (keyword) => products.find((item) => String(item.category || "").includes(keyword)) || products[0] || null;
+  return [
+    { href: "perfumes.html", label: "العطور", icon: "fa-spray-can-sparkles", item: findByCategory("العطور") },
+    { href: "kummah.html", label: getCategoryLabel("الكميم"), icon: "fa-shirt", item: findByCategory("الكميم") },
+    { href: "massar.html", label: getCategoryLabel("المصار"), icon: "fa-crown", item: findByCategory("المصار") },
+    { href: "sticks.html", label: getCategoryLabel("العصي"), icon: "fa-wand-magic-sparkles", item: findByCategory("العصي") },
+    { href: "shoes.html", label: getCategoryLabel("الأحذية"), icon: "fa-shoe-prints", item: findByCategory("الأحذية") },
+    { href: "accounts.html", label: t("accounts", "الحسابات"), icon: "fa-layer-group", item: null }
+  ].map((entry) => ({
+    ...entry,
+    image: entry.item?.imgUrl || entry.item?.gallery?.[0] || fallbackImage || "icon.svg"
+  }));
+}
+
+function renderModernHomeCategory(entry) {
+  return `
+    <a class="tayya-category-card" href="${escapeHtml(entry.href)}">
+      <span class="tayya-category-card__image"><img src="${escapeHtml(entry.image)}" alt=""></span>
+      <span class="tayya-category-card__meta">
+        <i class="fas ${escapeHtml(entry.icon)}"></i>
+        <strong>${escapeHtml(entry.label)}</strong>
+        <small>عرض المنتجات</small>
+      </span>
+    </a>
+  `;
+}
+
+function renderLoginPage() {
+  if (state.user) {
+    return `
+      <section class="section-card auth-portal auth-portal--signed">
+        <div>
+          <span class="tayya-kicker">حسابك</span>
+          <h2>أنت مسجل الدخول بالفعل</h2>
+          <p>انتقل إلى حسابك لمتابعة الطلبات والعناوين والمفضلة.</p>
+        </div>
+        <div class="actions-row">
+          <a class="primary-button" href="account.html">حسابي</a>
+          ${isAdmin() ? '<a class="ghost-button" href="admin.html">الأدمن</a>' : ""}
+        </div>
+      </section>
+    `;
+  }
+
+  const phoneValue = state.phoneAuth.phoneNumber || state.customer.phone || state.user?.phoneNumber || "";
+  const verifyBlock = state.phoneAuth.step === "verify" ? `
+    <form class="auth-card auth-card--stacked auth-card--otp" id="phone-verify-form">
+      <div class="section-head">
+        <div>
+          <span class="tayya-kicker">OTP</span>
+          <h3>تأكيد الرمز</h3>
+          <p>أدخل رمز التحقق المكون من 6 أرقام لإكمال الدخول.</p>
+        </div>
+      </div>
+      <input class="control" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" required>
+      <div class="actions-row auth-actions">
+        <button class="primary-button" type="submit">تأكيد الدخول</button>
+        <button class="ghost-button" type="button" data-action="reset-phone-auth">تغيير الرقم</button>
+      </div>
+    </form>
+  ` : "";
+
+  return `
+    <section class="auth-portal">
+      <aside class="auth-portal__intro">
+        <span class="tayya-kicker">دخول / إنشاء حساب</span>
+        <h2>اختر الطريقة الأسهل لك</h2>
+        <p>كل طرق الدخول في صفحة واحدة، بتصميم أخف على الجوال واللابتوب.</p>
+        <div class="auth-method-grid">
+          <button class="auth-method auth-method--google" type="button" data-social-login="google"><i class="fab fa-google"></i><span>Google</span></button>
+          <button class="auth-method auth-method--facebook" type="button" data-social-login="facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></button>
+          <a class="auth-method" href="#phone-auth-form"><i class="fas fa-mobile-screen"></i><span>رقم الجوال</span></a>
+          <a class="auth-method" href="#login-form"><i class="fas fa-envelope"></i><span>البريد</span></a>
+        </div>
+      </aside>
+
+      <div class="auth-portal__forms">
+        <form class="auth-card auth-card--stacked" id="login-form">
+          <div class="section-head">
+            <div>
+              <span class="tayya-kicker">Email</span>
+              <h3>الدخول بالبريد</h3>
+              <p>استخدم بريدك وكلمة المرور للوصول إلى حسابك.</p>
+            </div>
+          </div>
+          <input class="control" name="email" type="email" autocomplete="email" placeholder="البريد الإلكتروني" required>
+          <input class="control" name="password" type="password" autocomplete="current-password" placeholder="كلمة المرور" required>
+          <div class="actions-row auth-actions">
+            <button class="primary-button" type="submit">دخول</button>
+            <button class="ghost-button" type="button" data-reset-password>استرجاع كلمة المرور</button>
+          </div>
+        </form>
+
+        <form class="auth-card auth-card--stacked" id="phone-auth-form">
+          <div class="section-head">
+            <div>
+              <span class="tayya-kicker">Phone</span>
+              <h3>الدخول برقم الجوال</h3>
+              <p>أدخل الرقم بصيغة دولية مثل +968 ثم أكمل التحقق بالرمز.</p>
+            </div>
+          </div>
+          <input class="control" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+968 9X XXX XXX" value="${escapeHtml(phoneValue)}" required>
+          <div id="phone-auth-recaptcha" class="recaptcha-slot ${state.firebaseReady ? "" : "is-hidden"}"></div>
+          <button class="primary-button" type="submit">${state.phoneAuth.step === "verify" ? "إعادة إرسال الرمز" : "إرسال الرمز"}</button>
+        </form>
+
+        ${verifyBlock}
+
+        <div class="auth-switch-card">
+          <div>
+            <strong>ليس لديك حساب؟</strong>
+            <span>أنشئ حسابك خلال لحظات.</span>
+          </div>
+          <a class="ghost-button" href="register.html">إنشاء حساب</a>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderRegisterPage() {
+  if (state.user) {
+    return `
+      <section class="section-card auth-portal auth-portal--signed">
+        <div>
+          <span class="tayya-kicker">حسابك</span>
+          <h2>تم تسجيل الدخول</h2>
+          <p>يمكنك الآن إدارة العناوين والطلبات من صفحة الحساب.</p>
+        </div>
+        <a class="primary-button" href="account.html">حسابي</a>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="auth-portal">
+      <aside class="auth-portal__intro">
+        <span class="tayya-kicker">حساب جديد</span>
+        <h2>بيانات قليلة وتجربة أسرع</h2>
+        <p>ابدأ بالبريد أو استخدم حساب اجتماعي، ثم أكمل بيانات التوصيل من صفحة الحساب.</p>
+        <div class="auth-method-grid">
+          <button class="auth-method auth-method--google" type="button" data-social-login="google"><i class="fab fa-google"></i><span>Google</span></button>
+          <button class="auth-method auth-method--facebook" type="button" data-social-login="facebook"><i class="fab fa-facebook-f"></i><span>Facebook</span></button>
+        </div>
+      </aside>
+
+      <form class="auth-card auth-card--stacked auth-portal__forms" id="register-form">
+        <div class="section-head">
+          <div>
+            <span class="tayya-kicker">Register</span>
+            <h3>إنشاء حساب</h3>
+            <p>احفظ طلباتك وعناوينك ومفضلاتك من مكان واحد.</p>
+          </div>
+        </div>
+        <div class="form-grid form-grid--two">
+          <input class="control" name="name" autocomplete="name" placeholder="الاسم الكامل" required>
+          <input class="control" name="email" type="email" autocomplete="email" placeholder="البريد الإلكتروني" required>
+        </div>
+        <div class="form-grid form-grid--two">
+          <input class="control" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="رقم الجوال">
+          <input class="control" name="password" type="password" autocomplete="new-password" placeholder="كلمة المرور" required>
+        </div>
+        <div class="actions-row auth-actions">
+          <button class="primary-button" type="submit">إنشاء الحساب</button>
+          <a class="ghost-button" href="login.html">لدي حساب</a>
+        </div>
+      </form>
+    </section>
+  `;
 }

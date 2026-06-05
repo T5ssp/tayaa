@@ -1,0 +1,749 @@
+.lux-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.lux-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(90, 11, 20, 0.12);
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.luxury-action-row,
+.luxury-quick-actions {
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.luxury-action-row .action-icon-btn.active,
+.luxury-quick-actions .ghost-btn.active {
+  background: var(--primary);
+  color: var(--gold);
+  border-color: var(--primary);
+}
+
+.trust-strip,
+.recommendations-section {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.experience-hub__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.trust-strip__grid,
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.trust-card,
+.experience-card,
+.recommend-card,
+.compare-card,
+.cart-progress,
+.social-auth-row {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 55%),
+    var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: 0 14px 36px rgba(27, 15, 8, 0.08);
+}
+
+.trust-card {
+  padding: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.experience-card {
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.experience-card__metric {
+  color: var(--primary);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.experience-card__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.experience-card__actions .ghost-btn {
+  flex: 1 1 130px;
+}
+
+.trust-card i {
+  width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.trust-card h3,
+.recommendations-head h3,
+.compare-drawer__header h3,
+.social-auth-title {
+  color: var(--primary);
+}
+
+.trust-card p,
+.recommend-card p,
+.recommendations-head p,
+.cart-progress__meta,
+.social-auth-note {
+  opacity: 0.82;
+}
+
+.smart-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+
+.smart-filters .sort-select {
+  min-width: 150px;
+  flex: 1 1 150px;
+}
+
+.recommendations-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.recommend-card {
+  overflow: hidden;
+  display: grid;
+}
+
+.recommend-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.recommend-card__content {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.recommend-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(90, 11, 20, 0.08);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.recommend-card__price {
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.recommend-card__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.recommend-card__actions .ghost-btn,
+.social-auth-btn {
+  flex: 1 1 140px;
+}
+
+.compare-drawer {
+  position: fixed;
+  inset-inline: 20px;
+  bottom: 18px;
+  z-index: 120;
+  transform: translateY(calc(100% + 24px));
+  transition: transform 0.28s ease;
+}
+
+.compare-drawer.open {
+  transform: translateY(0);
+}
+
+.compare-drawer__shell {
+  border-radius: 22px;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: linear-gradient(135deg, rgba(16, 20, 24, 0.95), rgba(42, 25, 18, 0.94));
+  color: #fff8ee;
+  box-shadow: 0 18px 48px rgba(16, 20, 24, 0.28);
+  padding: 18px;
+}
+
+.compare-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.compare-drawer__header h3,
+.compare-drawer__header p,
+.compare-card,
+.compare-card .lux-meta-chip {
+  color: inherit;
+}
+
+.compare-drawer__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.compare-drawer__actions .ghost-btn {
+  border-color: rgba(255, 248, 238, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff8ee;
+}
+
+.compare-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.compare-card {
+  padding: 16px;
+  border: 1px solid rgba(255, 248, 238, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.compare-card strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+
+.compare-card__price {
+  color: #ffd978;
+  font-size: 22px;
+  font-weight: 900;
+  margin: 8px 0;
+}
+
+.compare-card__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.compare-card__actions .ghost-btn {
+  flex: 1 1 110px;
+}
+
+.cart-progress {
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+
+.cart-progress__bar {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(90, 11, 20, 0.08);
+  margin: 10px 0;
+}
+
+.cart-progress__fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold), #f3d98d);
+  transition: width 0.28s ease;
+}
+
+.cart-progress__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+
+.cart-progress__trust {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.cart-progress__trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(90, 11, 20, 0.08);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.social-auth-row {
+  margin-top: 14px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.social-auth-title {
+  font-weight: 800;
+}
+
+.social-auth-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.social-auth-btn {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--bg);
+  color: var(--primary);
+  cursor: pointer;
+  font-weight: 800;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.social-auth-btn:hover,
+.recommend-card__actions .ghost-btn:hover,
+.compare-card__actions .ghost-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(27, 15, 8, 0.12);
+}
+
+.checkout-panel,
+.admin-section-card,
+.admin-stat-card,
+.admin-insight-card,
+.admin-order-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 55%),
+    var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: 0 14px 36px rgba(27, 15, 8, 0.08);
+}
+
+.checkout-panel {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.checkout-panel__head {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.checkout-panel__head small {
+  opacity: 0.75;
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.payment-method {
+  border: 1px solid var(--border-color);
+  background: var(--bg);
+  color: var(--primary);
+  border-radius: 16px;
+  padding: 14px 12px;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  cursor: pointer;
+  font-weight: 800;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.payment-method i {
+  font-size: 20px;
+}
+
+.payment-method:hover,
+.payment-method.active {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(212, 175, 55, 0.1);
+  box-shadow: 0 12px 28px rgba(27, 15, 8, 0.12);
+}
+
+.payment-hint,
+.bank-transfer-box,
+.admin-section-note {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.8;
+  opacity: 0.85;
+}
+
+.bank-transfer-box {
+  white-space: pre-line;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(90, 11, 20, 0.06);
+  border: 1px dashed rgba(90, 11, 20, 0.18);
+}
+
+.checkout-submit-btn {
+  margin-top: 10px;
+}
+
+.admin-section-card {
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.admin-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.admin-settings-grid,
+.admin-stats-grid,
+.admin-insights-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-settings-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.admin-stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 16px;
+}
+
+.admin-stat-card {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.admin-stat-card span {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.admin-stat-card strong {
+  color: var(--primary);
+  font-size: 28px;
+}
+
+.admin-insights-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.admin-insight-card,
+.admin-order-card {
+  padding: 16px;
+}
+
+.admin-insight-card h4 {
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.ops-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(90, 11, 20, 0.08);
+}
+
+.ops-list-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ops-list-row p {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.analytics-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.analytics-bar-row {
+  display: grid;
+  gap: 8px;
+}
+
+.analytics-bar-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.analytics-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(90, 11, 20, 0.08);
+  overflow: hidden;
+}
+
+.analytics-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--gold));
+}
+
+.account-modal {
+  max-width: 920px;
+}
+
+.account-shell {
+  display: grid;
+  gap: 16px;
+}
+
+.account-block {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 55%),
+    var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 14px 36px rgba(27, 15, 8, 0.08);
+}
+
+.account-block__head,
+.account-order-card__head,
+.account-inline-actions,
+.account-favorite-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.account-address-form,
+.account-track-form,
+.account-summary-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.account-address-form,
+.account-track-form {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  margin-bottom: 12px;
+}
+
+.account-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.account-stat-card,
+.account-order-card,
+.account-address-card,
+.account-favorite-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(90, 11, 20, 0.08);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.account-stat-card span,
+.account-order-card__meta,
+.account-address-card p,
+.account-favorite-card p {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.account-stat-card strong {
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.account-stat-card p {
+  font-size: 12px;
+  opacity: 0.78;
+  margin-top: 6px;
+}
+
+.account-order-card,
+.account-address-card {
+  margin-top: 12px;
+}
+
+.order-timeline {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.order-timeline__step {
+  position: relative;
+  padding: 10px 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(90, 11, 20, 0.1);
+  background: rgba(90, 11, 20, 0.05);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.order-timeline__step.active {
+  background: rgba(212, 175, 55, 0.14);
+  border-color: rgba(212, 175, 55, 0.4);
+  color: var(--primary);
+  opacity: 1;
+}
+
+.order-timeline__step.current {
+  box-shadow: inset 0 0 0 1px rgba(90, 11, 20, 0.1), 0 8px 18px rgba(27, 15, 8, 0.08);
+}
+
+.account-favorite-card img {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.account-favorite-card {
+  display: grid;
+  grid-template-columns: 68px 1fr auto;
+}
+
+body.dark-mode .trust-card,
+body.dark-mode .experience-card,
+body.dark-mode .recommend-card,
+body.dark-mode .cart-progress,
+body.dark-mode .social-auth-row,
+body.dark-mode .checkout-panel,
+body.dark-mode .admin-section-card,
+body.dark-mode .admin-stat-card,
+body.dark-mode .admin-insight-card,
+body.dark-mode .admin-order-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 55%),
+    var(--card-bg);
+}
+
+body.dark-mode .lux-meta-chip,
+body.dark-mode .cart-progress__trust span,
+body.dark-mode .recommend-card__eyebrow,
+body.dark-mode .payment-method,
+body.dark-mode .account-block,
+body.dark-mode .account-stat-card,
+body.dark-mode .account-order-card,
+body.dark-mode .account-address-card,
+body.dark-mode .account-favorite-card {
+  color: #f5e8cc;
+  border-color: rgba(212, 175, 55, 0.2);
+  background: rgba(212, 175, 55, 0.12);
+}
+
+body.dark-mode .order-timeline__step {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(212, 175, 55, 0.12);
+}
+
+body.dark-mode .order-timeline__step.active {
+  background: rgba(212, 175, 55, 0.16);
+}
+
+@media (max-width: 720px) {
+  .compare-drawer {
+    inset-inline: 12px;
+    bottom: 12px;
+  }
+
+  .recommend-card img {
+    height: 180px;
+  }
+
+  .smart-filters .sort-select,
+  .recommend-card__actions .ghost-btn,
+  .experience-card__actions .ghost-btn,
+  .social-auth-btn,
+  .payment-method {
+    flex-basis: 100%;
+  }
+
+  .payment-methods,
+  .experience-hub__grid,
+  .admin-settings-grid,
+  .admin-stats-grid,
+  .admin-insights-grid,
+  .account-address-form,
+  .account-track-form,
+  .account-summary-grid,
+  .account-favorite-card {
+    grid-template-columns: 1fr;
+  }
+
+  .order-timeline {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

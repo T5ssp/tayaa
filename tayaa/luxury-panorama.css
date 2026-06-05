@@ -1,0 +1,368 @@
+.panorama-shell {
+  max-width: 1200px;
+  margin: 26px auto;
+  padding: 0 20px;
+}
+
+.panorama-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panorama-head h2 {
+  color: var(--primary);
+}
+
+.panorama-head p {
+  opacity: 0.82;
+}
+
+.panorama-chip-grid {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+
+.panorama-chip-grid::-webkit-scrollbar {
+  display: none;
+}
+
+.panorama-chip {
+  flex: 0 0 auto;
+  border: 1px solid rgba(90, 11, 20, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+  color: var(--primary);
+  padding: 10px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.22s ease, background 0.22s ease, color 0.22s ease;
+}
+
+.panorama-chip:hover {
+  transform: translateY(-2px);
+  background: var(--primary);
+  color: #fff8ee;
+}
+
+#panorama-rail {
+  position: fixed;
+  top: 140px;
+  left: 20px;
+  width: 250px;
+  z-index: 118;
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(90, 11, 20, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22), transparent 60%),
+    var(--card-bg);
+  box-shadow: 0 18px 40px rgba(27, 15, 8, 0.12);
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#panorama-rail.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.panorama-rail__head strong {
+  color: var(--primary);
+}
+
+.panorama-rail__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.panorama-rail__stats div {
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(212, 175, 55, 0.08);
+  text-align: center;
+}
+
+.panorama-rail__stats span {
+  display: block;
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.panorama-rail__progress {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(90, 11, 20, 0.08);
+  overflow: hidden;
+}
+
+.panorama-rail__progress i {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--primary));
+}
+
+.panorama-rail__note {
+  margin: 12px 0 14px;
+  font-size: 13px;
+  opacity: 0.82;
+}
+
+.panorama-rail__actions {
+  display: grid;
+  gap: 10px;
+}
+
+#panorama-command {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: none;
+}
+
+#panorama-command.open {
+  display: block;
+}
+
+.panorama-command__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 9, 10, 0.52);
+  backdrop-filter: blur(10px);
+}
+
+.panorama-command__panel {
+  position: relative;
+  width: min(720px, calc(100vw - 32px));
+  margin: 9vh auto 0;
+  padding: 20px;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.08), transparent 62%),
+    rgba(20, 16, 18, 0.96);
+  box-shadow: 0 34px 70px rgba(0,0,0,0.28);
+  color: #fff8ee;
+}
+
+.panorama-command__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panorama-command__head strong {
+  color: #fff5d6;
+}
+
+.panorama-command__head span {
+  opacity: 0.72;
+  font-size: 13px;
+}
+
+#panorama-command-input {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff8ee;
+}
+
+.panorama-command__list {
+  display: grid;
+  gap: 10px;
+  max-height: 52vh;
+  overflow: auto;
+}
+
+.panorama-command__item,
+.panorama-command__empty {
+  border-radius: 18px;
+  padding: 14px 16px;
+}
+
+.panorama-command__item {
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  color: #fff8ee;
+  text-align: right;
+  cursor: pointer;
+  transition: transform 0.22s ease, background 0.22s ease;
+}
+
+.panorama-command__item:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.08);
+}
+
+.panorama-command__empty {
+  background: rgba(255,255,255,0.04);
+  opacity: 0.75;
+}
+
+.panorama-ticker {
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(90, 11, 20, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.22), transparent 60%),
+    var(--card-bg);
+  box-shadow: 0 16px 34px rgba(27, 15, 8, 0.08);
+}
+
+.panorama-ticker__track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  padding: 14px;
+  animation: panoramaTicker 34s linear infinite;
+}
+
+.panorama-ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@keyframes panoramaTicker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.panorama-admin-filters {
+  margin-bottom: 14px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(90, 11, 20, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.2), transparent 60%),
+    var(--card-bg);
+}
+
+.panorama-admin-filters__head {
+  margin-bottom: 12px;
+  color: var(--primary);
+}
+
+.panorama-admin-filters__controls {
+  display: grid;
+  gap: 12px;
+}
+
+.panorama-order-statuses {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.panorama-order-statuses button {
+  border: 1px solid rgba(90, 11, 20, 0.1);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--primary);
+  padding: 8px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.panorama-order-statuses button.active {
+  background: var(--primary);
+  color: #fff8ee;
+}
+
+.panorama-skeleton-card {
+  border-radius: 24px;
+  padding: 18px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.22), rgba(255,255,255,0.08)),
+    var(--card-bg);
+  background-size: 220% 100%;
+  animation: panoramaShimmer 1.3s infinite linear;
+  box-shadow: 0 12px 26px rgba(27, 15, 8, 0.06);
+}
+
+.panorama-skeleton-card__media,
+.panorama-skeleton-card__line {
+  border-radius: 16px;
+  background: rgba(90, 11, 20, 0.08);
+}
+
+.panorama-skeleton-card__media {
+  height: 260px;
+  margin-bottom: 18px;
+}
+
+.panorama-skeleton-card__line {
+  height: 16px;
+  margin-bottom: 10px;
+}
+
+.panorama-skeleton-card__line--lg {
+  width: 72%;
+}
+
+.panorama-skeleton-card__line--sm {
+  width: 38%;
+}
+
+@keyframes panoramaShimmer {
+  from { background-position: 0 0; }
+  to { background-position: 220% 0; }
+}
+
+@media (max-width: 1280px) {
+  #panorama-rail {
+    left: 14px;
+    width: 220px;
+  }
+}
+
+@media (max-width: 1080px) {
+  #panorama-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .panorama-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .panorama-command__panel {
+    margin-top: 6vh;
+    padding: 16px;
+  }
+}
+
+body.dark-mode #panorama-rail,
+body.dark-mode .panorama-admin-filters,
+body.dark-mode .panorama-ticker,
+body.dark-mode .panorama-chip,
+body.dark-mode .panorama-skeleton-card {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), transparent 60%),
+    rgba(24, 24, 28, 0.94);
+}
+
+body.dark-mode .panorama-chip {
+  color: #fff0cf;
+}

@@ -8,6 +8,7 @@ bootMonitor.started = true;
 
 const CURRENCY = "ر.ع";
 const FREE_SHIPPING = 30;
+const ADMIN_EMAIL = "bader2233062@gmail.com";
 const STORAGE = {
   cart: "tayya_clean_cart_v1",
   favorites: "tayya_clean_favorites_v1",
@@ -25,6 +26,21 @@ const CATEGORY_META = {
   "العطور": { href: "perfumes.html", icon: "fa-spray-can-sparkles", intro: "عطور بخطوط دافئة وفاخرة وثبات أجمل." },
   "الحسابات": { href: "accounts.html", icon: "fa-layer-group", intro: "حسابات رقمية وخدمات جاهزة بتجربة شراء واضحة." }
 };
+
+const IMAGE_LIBRARY = [
+  { src: "./assets/products/kummah-shop.jpg", label: "كميم مطرز أحمر", category: "الكميم" },
+  { src: "./assets/products/kummah-souq.jpg", label: "كميم أبيض كلاسيكي", category: "الكميم" },
+  { src: "./assets/products/khanjar-belt.jpg", label: "مصار عماني فاخر", category: "المصار" },
+  { src: "./assets/products/khanjar-belt-2.jpg", label: "مصار رسمي بني", category: "المصار" },
+  { src: "./assets/products/silver-cane-clean.jpg", label: "عصا فضية", category: "العصي" },
+  { src: "./assets/products/walking-stick-2.jpg", label: "عصا خشبية", category: "العصي" },
+  { src: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=900&q=85", label: "عطر عود", category: "العطور" },
+  { src: "https://images.unsplash.com/photo-1619994403073-2cec844b8e63?auto=format&fit=crop&w=900&q=85", label: "عطر عنبر", category: "العطور" },
+  { src: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=85", label: "حذاء بني", category: "الأحذية" },
+  { src: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=900&q=85", label: "حذاء أسود", category: "الأحذية" },
+  { src: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85", label: "حساب رقمي", category: "الحسابات" },
+  { src: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=85", label: "خدمة رقمية", category: "الحسابات" }
+];
 
 const DEFAULT_PRODUCTS = [
   {
@@ -170,6 +186,150 @@ const DEFAULT_PRODUCTS = [
     material: "خدمة رقمية",
     color: "رقمي",
     stock: 20
+  },
+  {
+    id: "perfume-rose-03",
+    category: "العطور",
+    title: "ورد ومسك فاخر",
+    price: 17.5,
+    badge: "ناعم",
+    image: "https://images.unsplash.com/photo-1619994403073-2cec844b8e63?auto=format&fit=crop&w=900&q=85",
+    description: "نفحات ورد ومسك بيضاء بطابع هادئ يناسب الهدايا اليومية.",
+    material: "ورد، مسك، أخشاب خفيفة",
+    color: "وردي",
+    stock: 14
+  },
+  {
+    id: "perfume-bakhoor-04",
+    category: "العطور",
+    title: "بخور المساء",
+    price: 22,
+    badge: "شرقي",
+    image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=900&q=85",
+    description: "عطر دافئ مستوحى من البخور العماني مع ثبات مناسب للمناسبات.",
+    material: "بخور، عود، عنبر",
+    color: "عنابي",
+    stock: 9
+  },
+  {
+    id: "kummah-gold-03",
+    category: "الكميم",
+    title: "كميم ذهبي للمناسبات",
+    price: 16,
+    badge: "مناسبة",
+    image: "./assets/products/kummah-shop.jpg",
+    description: "تطريز ذهبي واضح بتوازن أنيق مع خامة مريحة.",
+    material: "قطن مطرز",
+    color: "ذهبي",
+    stock: 15
+  },
+  {
+    id: "kummah-classic-04",
+    category: "الكميم",
+    title: "كميم كلاسيكي يومي",
+    price: 10.5,
+    badge: "يومي",
+    image: "./assets/products/kummah-souq.jpg",
+    description: "اختيار بسيط ومرتب للاستخدام اليومي والدوام.",
+    material: "قطن خفيف",
+    color: "أبيض",
+    stock: 26
+  },
+  {
+    id: "massar-silver-03",
+    category: "المصار",
+    title: "مصار فضي تراثي",
+    price: 36,
+    badge: "فضي",
+    image: "./assets/products/khanjar-belt.jpg",
+    description: "تفاصيل فضية تراثية بتشطيب مناسب للهدايا الرسمية.",
+    material: "جلد وفصوص فضية",
+    color: "فضي",
+    stock: 5
+  },
+  {
+    id: "massar-gift-04",
+    category: "المصار",
+    title: "مصار هدية ملكي",
+    price: 39,
+    badge: "هدية",
+    image: "./assets/products/khanjar-belt-2.jpg",
+    description: "قطعة هدية مرتبة بتفاصيل تقليدية ولمسة فاخرة.",
+    material: "جلد طبيعي",
+    color: "بني داكن",
+    stock: 7
+  },
+  {
+    id: "stick-silver-03",
+    category: "العصي",
+    title: "عصا مقبض فضي",
+    price: 24,
+    badge: "فضي",
+    image: "./assets/products/silver-cane-clean.jpg",
+    description: "عصا أنيقة بمقبض فضي وحضور رسمي واضح.",
+    material: "خشب ومعدن فضي",
+    color: "أسود وفضي",
+    stock: 8
+  },
+  {
+    id: "stick-classic-04",
+    category: "العصي",
+    title: "عصا كلاسيكية بنية",
+    price: 16,
+    badge: "كلاسيكي",
+    image: "./assets/products/walking-stick-2.jpg",
+    description: "تصميم خفيف ومتوازن للاستخدام اليومي والمناسبات.",
+    material: "خشب طبيعي",
+    color: "بني",
+    stock: 12
+  },
+  {
+    id: "shoe-sandal-03",
+    category: "الأحذية",
+    title: "نعال جلد عماني",
+    price: 18.5,
+    badge: "مريح",
+    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=900&q=85",
+    description: "نعال جلد عملي ومريح مناسب للزي العماني اليومي.",
+    material: "جلد طبيعي",
+    color: "بني",
+    stock: 18
+  },
+  {
+    id: "shoe-formal-04",
+    category: "الأحذية",
+    title: "حذاء رسمي مطفي",
+    price: 31,
+    badge: "مطفي",
+    image: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=900&q=85",
+    description: "حذاء رسمي بخامة مطفية وتفصيل نظيف.",
+    material: "جلد ناعم",
+    color: "أسود مطفي",
+    stock: 10
+  },
+  {
+    id: "account-office-03",
+    category: "الحسابات",
+    title: "حساب إنتاجية شهري",
+    price: 6,
+    badge: "عمل",
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=85",
+    description: "حساب رقمي لأدوات العمل والإنتاجية مع تسليم منظم.",
+    material: "اشتراك رقمي",
+    color: "رقمي",
+    stock: 25
+  },
+  {
+    id: "account-cloud-04",
+    category: "الحسابات",
+    title: "حساب تخزين سحابي",
+    price: 5.5,
+    badge: "سحابي",
+    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",
+    description: "خدمة حساب رقمي بتفاصيل تسليم واضحة بعد الطلب.",
+    material: "خدمة رقمية",
+    color: "رقمي",
+    stock: 22
   }
 ];
 
@@ -188,9 +348,11 @@ const remote = {
   userAccessLoaded: false,
   adminAccessLoaded: false,
   ordersLoaded: false,
+  customerOrdersLoaded: false,
   unsubscribeUsers: null,
   unsubscribeAdmins: null,
-  unsubscribeOrders: null
+  unsubscribeOrders: null,
+  unsubscribeCustomerOrders: null
 };
 
 let state = {
@@ -225,6 +387,15 @@ async function initFirebaseBridge() {
     remote.firebase.onAuthStateChange((profile) => {
       state.user = profile;
       saveJson(STORAGE.user, profile);
+      remote.unsubscribeCustomerOrders?.();
+      remote.unsubscribeCustomerOrders = null;
+      remote.customerOrdersLoaded = false;
+      if (!profile) {
+        state.orders = [];
+        state.addresses = [];
+        saveJson(STORAGE.orders, state.orders);
+        saveJson(STORAGE.addresses, state.addresses);
+      }
       if (profile?.addresses) {
         state.addresses = profile.addresses;
         saveJson(STORAGE.addresses, state.addresses);
@@ -233,6 +404,7 @@ async function initFirebaseBridge() {
         state.orders = profile.orders;
         saveJson(STORAGE.orders, state.orders);
       }
+      syncCustomerOrders(profile);
       syncAdminAccess();
       renderApp();
     }).catch((error) => console.warn("Firebase auth sync failed", error));
@@ -308,6 +480,21 @@ function syncAdminAccess() {
       remote.unsubscribeOrders = unsubscribe;
     }).catch((error) => console.warn("Firebase orders listener failed", error));
   }
+}
+
+function syncCustomerOrders(profile) {
+  if (!remote.configured || !remote.firebase || !profile?.uid) return;
+  remote.firebase.subscribeCustomerOrders((orders) => {
+    remote.customerOrdersLoaded = true;
+    state.orders = mergeOrders(orders, state.orders);
+    saveJson(STORAGE.orders, state.orders);
+    renderApp();
+  }, (error) => {
+    console.warn("Customer orders sync failed", error);
+    toast("تعذر تحميل طلباتك من Firebase. تحقق من قواعد Firestore.", "error");
+  }).then((unsubscribe) => {
+    remote.unsubscribeCustomerOrders = unsubscribe;
+  }).catch((error) => console.warn("Customer orders listener failed", error));
 }
 
 function renderApp() {
@@ -639,11 +826,13 @@ function renderCheckoutPage() {
         <input class="control" name="email" type="email" placeholder="البريد الإلكتروني" value="${escapeAttr(state.user?.email || "")}">
         <textarea class="control" name="address" placeholder="العنوان الكامل" required></textarea>
         <div class="payment-methods">
-          <label><input type="radio" name="paymentMethod" value="visa" required> <span><i class="fab fa-cc-visa"></i> Visa</span></label>
-          <label><input type="radio" name="paymentMethod" value="mastercard"> <span><i class="fab fa-cc-mastercard"></i> Mastercard</span></label>
-          <label><input type="radio" name="paymentMethod" value="apple-pay"> <span><i class="fab fa-apple-pay"></i> Apple Pay</span></label>
+          <label><input type="radio" name="paymentMethod" value="cash" checked required> <span><i class="fas fa-hand-holding-dollar"></i> الدفع عند الاستلام<small>متاح الآن</small></span></label>
+          <label><input type="radio" name="paymentMethod" value="bank-transfer"> <span><i class="fas fa-building-columns"></i> تحويل بنكي<small>تأكيد يدوي</small></span></label>
+          <label class="is-disabled"><input type="radio" name="paymentMethod" value="visa" disabled> <span><i class="fab fa-cc-visa"></i> Visa<small>قريباً</small></span></label>
+          <label class="is-disabled"><input type="radio" name="paymentMethod" value="mastercard" disabled> <span><i class="fab fa-cc-mastercard"></i> Mastercard<small>قريباً</small></span></label>
+          <label class="is-disabled"><input type="radio" name="paymentMethod" value="apple-pay" disabled> <span><i class="fab fa-apple-pay"></i> Apple Pay<small>قريباً</small></span></label>
         </div>
-        <p class="secure-note">لا يتم إدخال بيانات البطاقة داخل الموقع. الدفع الحقيقي يتم عبر مزود دفع آمن عند ربط بوابة الدفع.</p>
+        <p class="secure-note">الطلب يعمل الآن بالدفع عند الاستلام أو التحويل البنكي. Visa وMastercard وApple Pay تحتاج ربط مزود دفع آمن قبل تفعيلها.</p>
         <button class="btn btn--primary" type="submit">تأكيد الطلب</button>
       </form>
       <aside class="order-summary">
@@ -789,13 +978,56 @@ function renderAddress(address, index) {
 }
 
 function renderOrder(order) {
+  const items = Array.isArray(order.items) ? order.items : [];
+  const itemRows = items.map((item) =>
+    `<span>${escapeHtml(item.title || item.id)} × ${Number(item.qty || 1)} - ${formatPrice((item.price || 0) * (item.qty || 1))}</span>`
+  ).join("");
   return `
-    <article class="saved-item">
+    <article class="saved-item saved-item--invoice">
       <i class="fas fa-receipt"></i>
-      <div><strong>${escapeHtml(order.number)}</strong><span>${escapeHtml(order.date)} - ${escapeHtml(order.status)}</span></div>
+      <div>
+        <strong>فاتورة ${escapeHtml(order.number || order.id || "-")}</strong>
+        <span>${escapeHtml(formatOrderDate(order))} - ${escapeHtml(order.status || "تم استلام الطلب")}</span>
+        <span>الدفع: ${escapeHtml(getPaymentLabel(order.paymentMethod))} - ${escapeHtml(order.paymentStatus || "قيد المتابعة")}</span>
+        ${itemRows ? `<div class="invoice-lines">${itemRows}</div>` : ""}
+      </div>
       <b>${formatPrice(order.total)}</b>
     </article>
   `;
+}
+
+function mergeOrders(primary = [], fallback = []) {
+  const byKey = new Map();
+  [...primary, ...fallback].forEach((order) => {
+    if (!order) return;
+    const key = order.id || order.remoteId || order.number;
+    if (!key) return;
+    byKey.set(key, { ...(byKey.get(key) || {}), ...order });
+  });
+  return [...byKey.values()].sort((a, b) => Number(getOrderTime(b)) - Number(getOrderTime(a)));
+}
+
+function getOrderTime(order) {
+  if (order?.createdAt?.seconds) return order.createdAt.seconds * 1000;
+  if (typeof order?.createdAt === "number") return order.createdAt;
+  if (typeof order?.createdAt === "string") return Date.parse(order.createdAt) || 0;
+  return Date.parse(order?.date || "") || 0;
+}
+
+function formatOrderDate(order) {
+  const time = getOrderTime(order);
+  if (time) return new Date(time).toLocaleDateString("ar-OM");
+  return order?.date || "-";
+}
+
+function getPaymentLabel(method) {
+  return {
+    cash: "الدفع عند الاستلام",
+    "bank-transfer": "تحويل بنكي",
+    visa: "Visa",
+    mastercard: "Mastercard",
+    "apple-pay": "Apple Pay"
+  }[method] || method || "غير محدد";
 }
 
 function renderTrackOrderPage() {
@@ -953,9 +1185,19 @@ function renderAdminLogin() {
 
 function renderAdminProductForm(product = null) {
   const editing = product || null;
+  const selectedImage = editing?.image || IMAGE_LIBRARY[0]?.src || "";
   const categoryOptions = Object.keys(CATEGORY_META).map((category) =>
     `<option value="${escapeAttr(category)}" ${editing?.category === category ? "selected" : ""}>${category}</option>`
   ).join("");
+  const imageOptions = IMAGE_LIBRARY.map((image) => `
+    <label class="image-library__item ${image.src === selectedImage ? "is-selected" : ""}">
+      <input type="radio" name="imageChoice" value="${escapeAttr(image.src)}" data-admin-image-choice ${image.src === selectedImage ? "checked" : ""}>
+      <img src="${escapeAttr(image.src)}" alt="${escapeAttr(image.label)}">
+      <span>${escapeHtml(image.label)}</span>
+      <small>${escapeHtml(image.category)}</small>
+    </label>
+  `).join("");
+  const customImage = IMAGE_LIBRARY.some((image) => image.src === selectedImage) ? "" : selectedImage;
 
   return `
     <form class="panel form-stack admin-product-form" id="admin-product-form">
@@ -967,7 +1209,15 @@ function renderAdminProductForm(product = null) {
       <input class="control" name="name" placeholder="اسم المنتج" value="${escapeAttr(editing?.title || "")}" required>
       <select class="control" name="category" required>${categoryOptions}</select>
       <input class="control" name="price" type="number" min="0" step="0.1" placeholder="السعر" value="${escapeAttr(editing?.price || "")}" required>
-      <input class="control" name="image" type="url" placeholder="رابط الصورة" value="${escapeAttr(editing?.image || "")}" required>
+      <input type="hidden" name="image" value="${escapeAttr(selectedImage)}" data-admin-image-value required>
+      <div class="image-library" data-admin-image-library>
+        <div class="image-library__head">
+          <strong>مكتبة صور المنتجات</strong>
+          <span>اختر صورة جاهزة بدل لصق رابط.</span>
+        </div>
+        <div class="image-library__grid">${imageOptions}</div>
+      </div>
+      <input class="control" name="imageCustom" type="url" placeholder="رابط خارجي اختياري إذا لم تكن الصورة في المكتبة" value="${escapeAttr(customImage)}" data-admin-image-custom>
       <input class="control" name="badge" placeholder="وسم قصير" value="${escapeAttr(editing?.badge || "متوفر")}">
       <div class="form-row">
         <input class="control" name="material" placeholder="الخامة" value="${escapeAttr(editing?.material || "")}">
@@ -1095,15 +1345,17 @@ function renderAdminOrdersPanel() {
   const orders = remote.ordersLoaded ? remote.orders : [];
   const rows = orders.map((order) => {
     const customer = order.customer || {};
-    const message = `طلب جديد ${order.number || order.id} - ${customer.name || "عميل"} - ${formatPrice(order.total || 0)}`;
-    const mailHref = `mailto:bader2233062@gmail.com?subject=${encodeURIComponent("طلب جديد من طَيّة")}&body=${encodeURIComponent(message)}`;
+    const itemsText = (order.items || []).map((item) => `${item.title || item.id} × ${item.qty || 1}`).join("، ");
+    const message = `طلب جديد ${order.number || order.id} - ${customer.name || "عميل"} - ${formatPrice(order.total || 0)} - ${itemsText}`;
+    const mailHref = `mailto:${ADMIN_EMAIL}?subject=${encodeURIComponent("طلب جديد من طَيّة")}&body=${encodeURIComponent(message)}`;
     const whatsappHref = `https://wa.me/?text=${encodeURIComponent(message)}`;
     return `
       <tr>
-        <td><strong>${escapeHtml(order.number || order.id)}</strong><small>${escapeHtml(order.status || "-")}</small></td>
-        <td>${escapeHtml(customer.name || "-")}<small>${escapeHtml(customer.phone || customer.email || "")}</small></td>
-        <td>${escapeHtml(order.paymentMethod || "-")}<small>${escapeHtml(order.paymentStatus || "")}</small></td>
+        <td><strong>${escapeHtml(order.number || order.id)}</strong><small>${escapeHtml(formatOrderDate(order))} - ${escapeHtml(order.status || "-")}</small></td>
+        <td>${escapeHtml(customer.name || "-")}<small>${escapeHtml(customer.phone || customer.email || order.userEmail || "")}</small></td>
+        <td>${escapeHtml(getPaymentLabel(order.paymentMethod))}<small>${escapeHtml(order.paymentStatus || "")}</small></td>
         <td>${formatPrice(order.total || 0)}</td>
+        <td><small>${escapeHtml(itemsText || "-")}</small></td>
         <td class="admin-actions">
           <a href="${mailHref}"><i class="fas fa-envelope"></i> بريد</a>
           <a href="${whatsappHref}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> واتساب</a>
@@ -1122,8 +1374,8 @@ function renderAdminOrdersPanel() {
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
-          <thead><tr><th>الطلب</th><th>العميل</th><th>الدفع</th><th>الإجمالي</th><th>إشعار</th></tr></thead>
-          <tbody>${rows || '<tr><td colspan="5">لا توجد طلبات في Firestore بعد.</td></tr>'}</tbody>
+          <thead><tr><th>الطلب</th><th>العميل</th><th>الدفع</th><th>الإجمالي</th><th>المنتجات</th><th>إشعار</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="6">لا توجد طلبات في Firestore بعد.</td></tr>'}</tbody>
         </table>
       </div>
     </section>
@@ -1281,6 +1533,11 @@ function handleSubmit(event) {
 
 function handleInput(event) {
   if (event.target.matches("[data-filter-search], [data-sort]")) filterCatalog();
+  if (event.target.matches("[data-admin-image-choice]")) selectAdminImage(event.target.value);
+  if (event.target.matches("[data-admin-image-custom]")) {
+    const value = event.target.value.trim();
+    if (value) selectAdminImage(value, true);
+  }
 }
 
 function filterCatalog() {
@@ -1355,7 +1612,11 @@ async function logoutUser() {
     await remote.firebase.signOutUser().catch(() => null);
   }
   state.user = null;
+  state.orders = [];
+  state.addresses = [];
   saveJson(STORAGE.user, null);
+  saveJson(STORAGE.orders, state.orders);
+  saveJson(STORAGE.addresses, state.addresses);
   toast("تم تسجيل الخروج");
   window.location.href = "login.html";
 }
@@ -1405,6 +1666,17 @@ async function saveRemoteUserData() {
   }).catch((error) => console.warn("User profile sync failed", error));
 }
 
+function selectAdminImage(value, custom = false) {
+  const hidden = document.querySelector("[data-admin-image-value]");
+  if (hidden) hidden.value = value;
+  document.querySelectorAll(".image-library__item").forEach((item) => {
+    const input = item.querySelector("[data-admin-image-choice]");
+    const selected = !custom && input?.value === value;
+    item.classList.toggle("is-selected", selected);
+    if (input) input.checked = selected;
+  });
+}
+
 async function saveAdminProduct(data) {
   if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
     return toast("لا توجد صلاحية لإدارة المنتجات.", "error");
@@ -1414,7 +1686,7 @@ async function saveAdminProduct(data) {
     title: String(data.name || "").trim(),
     category: String(data.category || "").trim(),
     price: Number(data.price || 0),
-    image: String(data.image || "").trim(),
+    image: String(data.imageCustom || data.image || "").trim(),
     badge: String(data.badge || "متوفر").trim(),
     description: String(data.description || "").trim(),
     material: String(data.material || "").trim(),
@@ -1533,20 +1805,36 @@ async function createOrder(data) {
     }, 900);
     return;
   }
-  const total = getCartTotal();
+  const subtotal = getCartTotal();
+  const shipping = subtotal && subtotal < FREE_SHIPPING ? 1.5 : 0;
+  const paymentMethod = data.paymentMethod || "cash";
+  const paymentStatus = paymentMethod === "cash"
+    ? "الدفع عند الاستلام"
+    : paymentMethod === "bank-transfer"
+      ? "بانتظار تأكيد التحويل"
+      : "بانتظار ربط بوابة الدفع";
   const order = {
     number: `TY-${Math.floor(1000 + Math.random() * 9000)}`,
     date: new Date().toLocaleDateString("ar-OM"),
+    createdAt: Date.now(),
     status: "تم استلام الطلب",
-    paymentMethod: data.paymentMethod || "غير محدد",
-    paymentStatus: "بانتظار ربط بوابة الدفع",
-    total: total + (total < FREE_SHIPPING ? 1.5 : 0),
-    customer: data,
+    paymentMethod,
+    paymentStatus,
+    subtotal,
+    shipping,
+    total: subtotal + shipping,
+    customer: {
+      ...data,
+      email: data.email || state.user?.email || "",
+      phone: data.phone || state.user?.phone || ""
+    },
     items: state.cart.map((line) => {
       const product = getProduct(line.id);
       return {
         id: line.id,
         title: product?.title || line.id,
+        category: product?.category || "",
+        image: product?.image || "",
         price: product?.price || 0,
         qty: line.qty
       };
@@ -1557,11 +1845,12 @@ async function createOrder(data) {
       const created = await remote.firebase.createOrder(order);
       order.remoteId = created.id;
     } catch (error) {
-      console.warn("Order notification sync failed", error);
-      toast("تم حفظ الطلب محلياً، لكن تعذر إرساله للوحة الإدارة.", "error");
+      console.error("Order creation failed", error);
+      toast(`تعذر إنشاء الطلب في Firebase: ${getFirebaseErrorMessage(error)}`, "error");
+      return;
     }
   }
-  state.orders.unshift(order);
+  state.orders = mergeOrders([order], state.orders);
   state.cart = [];
   if (data.address) state.addresses.unshift({ label: "عنوان الطلب", address: data.address });
   saveJson(STORAGE.orders, state.orders);

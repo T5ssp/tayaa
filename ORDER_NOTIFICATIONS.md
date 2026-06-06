@@ -18,6 +18,8 @@ The queued email is addressed to:
 bader2233062@gmail.com
 ```
 
+When the customer is signed in with an email account, the site also queues a customer invoice email to the same authenticated email address. Phone-only customers still see the invoice in `account.html`; sending invoices to arbitrary typed emails should be handled by a trusted Cloud Function to avoid abuse.
+
 To make the email send automatically, install and configure Firebase's **Trigger Email** extension in Firebase Console:
 
 1. Open Firebase Console.

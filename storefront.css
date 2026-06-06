@@ -907,6 +907,23 @@ textarea.control {
   color: var(--muted);
 }
 
+.saved-item--invoice {
+  align-items: start;
+}
+
+.invoice-lines {
+  display: grid;
+  gap: 3px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.invoice-lines span {
+  margin: 0;
+  font-size: 13px;
+}
+
 .saved-item button {
   border: 0;
   background: transparent;
@@ -1127,6 +1144,76 @@ textarea.control {
   resize: vertical;
 }
 
+.image-library {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.image-library__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--burgundy);
+}
+
+.image-library__head span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.image-library__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.image-library__item {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.image-library__item.is-selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(216, 168, 76, 0.18);
+}
+
+.image-library__item input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.image-library__item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+.image-library__item span {
+  color: var(--burgundy);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.image-library__item small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1291,6 +1378,22 @@ textarea.control {
   background: #fff;
   color: var(--burgundy);
   font-weight: 900;
+}
+
+.payment-methods label span {
+  display: grid;
+  gap: 2px;
+}
+
+.payment-methods label small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.payment-methods label.is-disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
 }
 
 .payment-methods i {
@@ -1581,6 +1684,23 @@ textarea.control {
 
   .address-form {
     grid-template-columns: 1fr;
+  }
+
+  .saved-item {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .saved-item > b {
+    grid-column: 2;
+  }
+
+  .image-library__head {
+    display: grid;
+  }
+
+  .image-library__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 300px;
   }
 
   .admin-status,

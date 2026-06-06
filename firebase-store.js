@@ -1,6 +1,7 @@
 import { firebaseAdminEmails, firebaseConfig } from "./firebase-config.js";
 
 const FIREBASE_VERSION = "10.12.5";
+const ADMIN_ORDER_EMAIL = "bader2233062@gmail.com";
 const SDK = {
   app: `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`,
   auth: `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`,
@@ -174,6 +175,25 @@ export async function subscribeOrders(callback, onError) {
   }, onError);
 }
 
+export async function subscribeCustomerOrders(callback, onError) {
+  const { firestoreModule } = await ensureFirebase();
+  const user = auth.currentUser;
+  if (!user) {
+    callback([]);
+    return () => {};
+  }
+  const ref = firestoreModule.query(
+    firestoreModule.collection(db, "orders"),
+    firestoreModule.where("userId", "==", user.uid)
+  );
+  return firestoreModule.onSnapshot(ref, (snapshot) => {
+    const orders = snapshot.docs
+      .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+      .sort((a, b) => String(b.createdAt?.seconds || b.createdAt || "").localeCompare(String(a.createdAt?.seconds || a.createdAt || "")));
+    callback(orders);
+  }, onError);
+}
+
 export async function addProduct(product) {
   const { firestoreModule } = await ensureFirebase();
   const ref = firestoreModule.collection(db, "products");
@@ -215,16 +235,22 @@ export async function seedProducts(products) {
 export async function createOrder(order) {
   const { firestoreModule } = await ensureFirebase();
   const user = auth.currentUser;
-  const orderRef = await firestoreModule.addDoc(firestoreModule.collection(db, "orders"), {
+  const customerEmail = String(order.customer?.email || user?.email || "").trim().toLowerCase();
+  const orderPayload = {
     ...order,
     userId: user?.uid || "",
-    userEmail: user?.email || order.customer?.email || "",
-    adminEmail: "bader2233062@gmail.com",
+    userEmail: user?.email || customerEmail,
+    customer: {
+      ...(order.customer || {}),
+      email: customerEmail
+    },
+    adminEmail: ADMIN_ORDER_EMAIL,
     notificationStatus: "queued",
     createdAt: firestoreModule.serverTimestamp(),
     updatedAt: firestoreModule.serverTimestamp()
-  });
-  await queueOrderEmail(orderRef.id, order).catch((error) => {
+  };
+  const orderRef = await firestoreModule.addDoc(firestoreModule.collection(db, "orders"), orderPayload);
+  await queueOrderEmails(orderRef.id, orderPayload).catch((error) => {
     console.warn("Order email queue failed", error);
   });
   return orderRef;
@@ -282,32 +308,65 @@ async function toProfile(user) {
   };
 }
 
-async function queueOrderEmail(orderId, order) {
+async function queueOrderEmails(orderId, order) {
   const { firestoreModule } = await ensureFirebase();
-  const customer = order.customer || {};
-  const items = Array.isArray(order.items) ? order.items : [];
-  const text = [
-    `طلب جديد: ${order.number || orderId}`,
-    `العميل: ${customer.name || "-"}`,
-    `الجوال: ${customer.phone || "-"}`,
-    `البريد: ${customer.email || "-"}`,
-    `العنوان: ${customer.address || "-"}`,
-    `الدفع: ${order.paymentMethod || "-"}`,
-    `الإجمالي: ${order.total || 0} ر.ع`,
-    "",
-    "المنتجات:",
-    ...items.map((item) => `- ${item.title} x${item.qty} (${item.price} ر.ع)`)
-  ].join("\n");
-  return firestoreModule.addDoc(firestoreModule.collection(db, "mail"), {
-    to: ["bader2233062@gmail.com"],
+  const batch = firestoreModule.writeBatch(db);
+  const adminRef = firestoreModule.doc(firestoreModule.collection(db, "mail"));
+  batch.set(adminRef, buildMailDocument({
+    to: ADMIN_ORDER_EMAIL,
+    subject: `طلب جديد من طَيّة ${order.number || orderId}`,
+    text: buildOrderText(orderId, order, "طلب جديد وصل للوحة الإدارة"),
+    orderId,
+    firestoreModule
+  }));
+  const customerEmail = String(order.customer?.email || order.userEmail || "").trim().toLowerCase();
+  const authEmail = String(auth.currentUser?.email || "").trim().toLowerCase();
+  if (customerEmail && customerEmail === authEmail) {
+    const customerRef = firestoreModule.doc(firestoreModule.collection(db, "mail"));
+    batch.set(customerRef, buildMailDocument({
+      to: customerEmail,
+      subject: `فاتورة طلبك من طَيّة ${order.number || orderId}`,
+      text: buildOrderText(orderId, order, "شكراً لطلبك من طَيّة. هذه فاتورة طلبك:"),
+      orderId,
+      firestoreModule
+    }));
+  }
+  return batch.commit();
+}
+
+function buildMailDocument({ to, subject, text, orderId, firestoreModule }) {
+  return {
+    to: [to],
     message: {
-      subject: `طلب جديد من طَيّة ${order.number || orderId}`,
+      subject,
       text,
       html: text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\n", "<br>")
     },
     orderId,
     createdAt: firestoreModule.serverTimestamp()
-  });
+  };
+}
+
+function buildOrderText(orderId, order, intro) {
+  const customer = order.customer || {};
+  const items = Array.isArray(order.items) ? order.items : [];
+  return [
+    intro,
+    "",
+    `رقم الطلب: ${order.number || orderId}`,
+    `العميل: ${customer.name || "-"}`,
+    `الجوال: ${customer.phone || "-"}`,
+    `البريد: ${customer.email || order.userEmail || "-"}`,
+    `العنوان: ${customer.address || "-"}`,
+    `الدفع: ${order.paymentMethod || "-"}`,
+    `حالة الدفع: ${order.paymentStatus || "-"}`,
+    `المجموع الفرعي: ${order.subtotal || 0} ر.ع`,
+    `الشحن: ${order.shipping || 0} ر.ع`,
+    `الإجمالي: ${order.total || 0} ر.ع`,
+    "",
+    "المنتجات:",
+    ...items.map((item) => `- ${item.title} x${item.qty} (${item.price} ر.ع)`)
+  ].join("\n");
 }
 
 function cleanProduct(product) {

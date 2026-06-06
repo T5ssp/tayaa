@@ -1,4 +1,4 @@
-const CACHE_NAME = "tayya-cache-v37";
+const CACHE_NAME = "tayya-cache-v38";
 const STATIC_ASSETS = [
   "./",
   "./index.html",

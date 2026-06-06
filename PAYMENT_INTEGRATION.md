@@ -2,15 +2,18 @@
 
 The checkout page is prepared for:
 
+- Cash on delivery
+- Bank transfer
 - Visa
 - Mastercard
 - Apple Pay
 
 Current behavior:
 
-- The user selects a payment method.
+- Cash on delivery and bank transfer can create real orders now.
+- Visa, Mastercard, and Apple Pay are shown as future secure-gateway options until a provider is connected.
 - The order is saved in Firestore with `paymentMethod`.
-- The order is marked `paymentStatus: "بانتظار ربط بوابة الدفع"`.
+- The order is marked with a manual `paymentStatus` such as cash on delivery or awaiting bank transfer confirmation.
 - The site does **not** collect raw card numbers, CVV, or Apple Pay tokens.
 
 Required for live payments:

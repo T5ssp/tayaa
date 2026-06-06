@@ -1,4 +1,4 @@
-const CACHE_NAME = "tayya-cache-v31";
+const CACHE_NAME = "tayya-cache-v32";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
@@ -20,7 +20,6 @@ const STATIC_ASSETS = [
   "./login.html",
   "./register.html",
   "./account.html",
-  "./vip.html",
   "./admin.html",
   "./admin-products.html",
   "./admin-accounts.html",
@@ -30,7 +29,6 @@ const STATIC_ASSETS = [
   "./admin-reports.html",
   "./404.html",
   "./edits.html",
-  "./mandoos.html",
   "./boot-guard.js",
   "./storefront.css",
   "./storefront.js",
@@ -40,8 +38,6 @@ const STATIC_ASSETS = [
   "./luxury-commerce.js",
   "./luxury-growth.css",
   "./luxury-growth.js",
-  "./luxury-odyssey.css",
-  "./luxury-odyssey.js",
   "./luxury-facelift.css",
   "./luxury-facelift.js",
   "./luxury-atelier.css",

@@ -118,7 +118,7 @@
       views: {
         landing: {
           title: "Intro",
-          body: "Brand opening, the premium lead section, and the most important entry points."
+          body: "Brand opening, the premium lead section, and the most important entry links."
         },
         shop: {
           title: "Shop",

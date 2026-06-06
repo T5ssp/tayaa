@@ -123,6 +123,28 @@ export async function subscribeProducts(callback, onError) {
   }, onError);
 }
 
+export async function subscribeUsers(callback, onError) {
+  const { firestoreModule } = await ensureFirebase();
+  const ref = firestoreModule.collection(db, "users");
+  return firestoreModule.onSnapshot(ref, (snapshot) => {
+    const users = snapshot.docs
+      .map((docSnap) => ({ uid: docSnap.id, ...docSnap.data() }))
+      .sort((a, b) => String(a.email || a.name || "").localeCompare(String(b.email || b.name || ""), "ar"));
+    callback(users);
+  }, onError);
+}
+
+export async function subscribeAdmins(callback, onError) {
+  const { firestoreModule } = await ensureFirebase();
+  const ref = firestoreModule.collection(db, "admins");
+  return firestoreModule.onSnapshot(ref, (snapshot) => {
+    const admins = snapshot.docs
+      .map((docSnap) => ({ uid: docSnap.id, ...docSnap.data() }))
+      .sort((a, b) => String(a.email || a.name || "").localeCompare(String(b.email || b.name || ""), "ar"));
+    callback(admins);
+  }, onError);
+}
+
 export async function addProduct(product) {
   const { firestoreModule } = await ensureFirebase();
   const ref = firestoreModule.collection(db, "products");
@@ -161,10 +183,31 @@ export async function seedProducts(products) {
   return batch.commit();
 }
 
+export async function grantAdmin(uid, data = {}) {
+  const { firestoreModule } = await ensureFirebase();
+  const current = auth.currentUser;
+  if (!current) throw new Error("Admin login is required.");
+  const ref = firestoreModule.doc(db, "admins", uid);
+  return firestoreModule.setDoc(ref, {
+    uid,
+    name: String(data.name || "").trim(),
+    email: String(data.email || "").trim(),
+    grantedBy: current.uid,
+    grantedByEmail: current.email || "",
+    updatedAt: firestoreModule.serverTimestamp()
+  }, { merge: true });
+}
+
+export async function revokeAdmin(uid) {
+  const { firestoreModule } = await ensureFirebase();
+  return firestoreModule.deleteDoc(firestoreModule.doc(db, "admins", uid));
+}
+
 async function toProfile(user) {
   const { firestoreModule } = await ensureFirebase();
   const token = await user.getIdTokenResult().catch(() => ({ claims: {} }));
   const savedSnap = await firestoreModule.getDoc(firestoreModule.doc(db, "users", user.uid)).catch(() => null);
+  const adminSnap = await firestoreModule.getDoc(firestoreModule.doc(db, "admins", user.uid)).catch(() => null);
   const saved = savedSnap?.exists?.() ? savedSnap.data() : {};
   const email = user.email || saved.email || "";
   return {
@@ -175,7 +218,7 @@ async function toProfile(user) {
     provider: user.providerData?.[0]?.providerId || saved.provider || "email",
     addresses: Array.isArray(saved.addresses) ? saved.addresses : [],
     orders: Array.isArray(saved.orders) ? saved.orders : [],
-    isAdmin: token.claims?.admin === true || firebaseAdminEmails.includes(email)
+    isAdmin: token.claims?.admin === true || adminSnap?.exists?.() === true || firebaseAdminEmails.includes(email)
   };
 }
 

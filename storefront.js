@@ -181,7 +181,13 @@ const remote = {
   configured: false,
   productsLoaded: false,
   productCount: 0,
-  products: []
+  products: [],
+  users: [],
+  admins: [],
+  userAccessLoaded: false,
+  adminAccessLoaded: false,
+  unsubscribeUsers: null,
+  unsubscribeAdmins: null
 };
 
 let state = {
@@ -224,6 +230,7 @@ async function initFirebaseBridge() {
         state.orders = profile.orders;
         saveJson(STORAGE.orders, state.orders);
       }
+      syncAdminAccess();
       renderApp();
     }).catch((error) => console.warn("Firebase auth sync failed", error));
 
@@ -239,6 +246,47 @@ async function initFirebaseBridge() {
     }).catch((error) => console.warn("Firebase products listener failed", error));
   } catch (error) {
     console.warn("Firebase bridge unavailable", error);
+  }
+}
+
+function syncAdminAccess() {
+  if (!remote.configured || !remote.firebase) return;
+  if (!state.user?.isAdmin) {
+    remote.users = [];
+    remote.admins = [];
+    remote.userAccessLoaded = false;
+    remote.adminAccessLoaded = false;
+    remote.unsubscribeUsers?.();
+    remote.unsubscribeAdmins?.();
+    remote.unsubscribeUsers = null;
+    remote.unsubscribeAdmins = null;
+    return;
+  }
+
+  if (!remote.unsubscribeUsers) {
+    remote.firebase.subscribeUsers((users) => {
+      remote.users = users;
+      remote.userAccessLoaded = true;
+      renderApp();
+    }, (error) => {
+      console.warn("Firebase users sync failed", error);
+      toast("تعذر تحميل قائمة المستخدمين. تحقق من قواعد Firestore.", "error");
+    }).then((unsubscribe) => {
+      remote.unsubscribeUsers = unsubscribe;
+    }).catch((error) => console.warn("Firebase users listener failed", error));
+  }
+
+  if (!remote.unsubscribeAdmins) {
+    remote.firebase.subscribeAdmins((admins) => {
+      remote.admins = admins;
+      remote.adminAccessLoaded = true;
+      renderApp();
+    }, (error) => {
+      console.warn("Firebase admins sync failed", error);
+      toast("تعذر تحميل صلاحيات المسؤولين. تحقق من قواعد Firestore.", "error");
+    }).then((unsubscribe) => {
+      remote.unsubscribeAdmins = unsubscribe;
+    }).catch((error) => console.warn("Firebase admins listener failed", error));
   }
 }
 
@@ -742,7 +790,7 @@ function renderAdminPage() {
           <i class="fas fa-database"></i>
           <div>
             <h2>Firebase غير مفعل بعد</h2>
-            <p>افتح ملف firebase-config.js وضع بيانات مشروعك، ثم فعّل Authentication وFirestore. بدون config لن نعرض أزرار تعديل حقيقية حتى لا نخدعك بواجهة وهمية.</p>
+            <p>افتح ملف firebase-config.js وضع بيانات مشروعك، ثم فعّل Authentication وFirestore. حساب المدير المقترح هو admin@tayya.om، ويمكنك تغييره قبل النشر.</p>
           </div>
         </article>
         <article class="panel admin-code">
@@ -792,6 +840,7 @@ function renderAdminPage() {
         ${renderAdminProductForm()}
         ${renderAdminProductsTable()}
       </div>
+      ${renderAdminAccessPanel()}
     </section>
   `;
 }
@@ -886,6 +935,78 @@ function renderAdminProductsTable() {
   `;
 }
 
+function renderAdminAccessPanel() {
+  const adminIds = new Set(remote.admins.map((admin) => admin.uid));
+  if (state.user?.uid && state.user.isAdmin && !adminIds.has(state.user.uid)) {
+    adminIds.add(state.user.uid);
+  }
+
+  const admins = remote.admins.length ? remote.admins : [];
+  const users = remote.users.length ? remote.users : [];
+  const userRows = users.map((user) => {
+    const isAdmin = adminIds.has(user.uid);
+    return `
+      <tr>
+        <td><strong>${user.name || "مستخدم"}</strong><small>${user.uid}</small></td>
+        <td>${user.email || "-"}</td>
+        <td>${user.phone || "-"}</td>
+        <td><span class="admin-badge ${isAdmin ? "is-admin" : ""}">${isAdmin ? "Admin" : "User"}</span></td>
+        <td class="admin-actions">
+          ${isAdmin ? "" : `<button type="button" data-admin-grant="${escapeAttr(user.uid)}"><i class="fas fa-user-shield"></i> منح صلاحية</button>`}
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  const adminRows = admins.map((admin) => `
+    <tr>
+      <td><strong>${admin.name || "مسؤول"}</strong><small>${admin.uid}</small></td>
+      <td>${admin.email || "-"}</td>
+      <td>${admin.grantedByEmail || "-"}</td>
+      <td class="admin-actions">
+        ${admin.uid === state.user?.uid ? '<span class="admin-note">حسابك الحالي</span>' : `<button type="button" data-admin-revoke="${escapeAttr(admin.uid)}"><i class="fas fa-user-minus"></i> سحب الصلاحية</button>`}
+      </td>
+    </tr>
+  `).join("");
+
+  return `
+    <section class="panel admin-access-panel">
+      <div class="panel__head">
+        <div>
+          <h2>المسؤولون والصلاحيات</h2>
+          <p>امنح الصلاحية لمستخدم سجل دخوله مرة واحدة على الأقل، أو أدخل UID يدوياً من Firebase Authentication.</p>
+        </div>
+      </div>
+      <form class="admin-role-form" id="admin-role-form">
+        <input class="control" name="uid" placeholder="UID المستخدم من Firebase" required>
+        <input class="control" name="email" type="email" placeholder="البريد الإلكتروني">
+        <input class="control" name="name" placeholder="اسم اختياري">
+        <button class="btn btn--primary" type="submit">منح صلاحية Admin</button>
+      </form>
+      <div class="admin-users-grid">
+        <div>
+          <h3>المسؤولون الحاليون</h3>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>الحساب</th><th>البريد</th><th>منحه</th><th>إجراء</th></tr></thead>
+              <tbody>${adminRows || '<tr><td colspan="4">لا توجد صلاحيات محفوظة في collection admins بعد.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>المستخدمون المسجلون</h3>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>الحساب</th><th>البريد</th><th>الجوال</th><th>الحالة</th><th>إجراء</th></tr></thead>
+              <tbody>${userRows || '<tr><td colspan="5">لا يوجد مستخدمون بعد. المستخدم يظهر هنا بعد أول تسجيل دخول.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function renderAssurance() {
   const items = [
     ["fa-headset", "دعم 24/7", "نحن هنا لخدمتك دائمًا"],
@@ -928,7 +1049,7 @@ function registerEvents() {
 }
 
 function handleClick(event) {
-  const target = event.target.closest("[data-add-cart], [data-favorite], [data-compare], [data-cart-qty], [data-remove-cart], [data-provider-login], [data-admin-provider-login], [data-admin-edit], [data-admin-delete], [data-admin-new], [data-admin-cancel], [data-admin-seed], [data-logout], [data-remove-address], [data-reset-filters], [data-step-qty], [data-open-favorites], [data-open-compare]");
+  const target = event.target.closest("[data-add-cart], [data-favorite], [data-compare], [data-cart-qty], [data-remove-cart], [data-provider-login], [data-admin-provider-login], [data-admin-edit], [data-admin-delete], [data-admin-new], [data-admin-cancel], [data-admin-seed], [data-admin-grant], [data-admin-revoke], [data-logout], [data-remove-address], [data-reset-filters], [data-step-qty], [data-open-favorites], [data-open-compare]");
   if (!target) return;
 
   if (target.dataset.addCart) {
@@ -945,6 +1066,8 @@ function handleClick(event) {
   if (target.dataset.adminDelete) deleteAdminProduct(target.dataset.adminDelete);
   if (target.dataset.adminNew !== undefined || target.dataset.adminCancel !== undefined) resetAdminForm();
   if (target.dataset.adminSeed !== undefined) seedAdminProducts();
+  if (target.dataset.adminGrant) grantAdminUser({ uid: target.dataset.adminGrant });
+  if (target.dataset.adminRevoke) revokeAdminUser(target.dataset.adminRevoke);
   if (target.dataset.logout !== undefined) logoutUser();
   if (target.dataset.removeAddress) removeAddress(Number(target.dataset.removeAddress));
   if (target.dataset.resetFilters !== undefined) resetFilters();
@@ -999,6 +1122,10 @@ function handleSubmit(event) {
   if (form.id === "admin-product-form") {
     event.preventDefault();
     saveAdminProduct(Object.fromEntries(new FormData(form)));
+  }
+  if (form.id === "admin-role-form") {
+    event.preventDefault();
+    grantAdminUser(Object.fromEntries(new FormData(form)));
   }
   if (form.id === "checkout-form") {
     event.preventDefault();
@@ -1190,6 +1317,41 @@ async function seedAdminProducts() {
   try {
     await remote.firebase.seedProducts(DEFAULT_PRODUCTS);
     toast("تم نسخ المنتجات التجريبية إلى Firestore");
+  } catch (error) {
+    console.error(error);
+    toast(getFirebaseErrorMessage(error), "error");
+  }
+}
+
+async function grantAdminUser(data = {}) {
+  if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
+    return toast("لا توجد صلاحية لإدارة المسؤولين.", "error");
+  }
+  const uid = String(data.uid || "").trim();
+  if (!uid) return toast("أدخل UID المستخدم.", "error");
+  const knownUser = remote.users.find((user) => user.uid === uid) || {};
+  try {
+    await remote.firebase.grantAdmin(uid, {
+      name: data.name || knownUser.name || "",
+      email: data.email || knownUser.email || ""
+    });
+    toast("تم منح صلاحية Admin");
+    document.getElementById("admin-role-form")?.reset();
+  } catch (error) {
+    console.error(error);
+    toast(getFirebaseErrorMessage(error), "error");
+  }
+}
+
+async function revokeAdminUser(uid) {
+  if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
+    return toast("لا توجد صلاحية لإدارة المسؤولين.", "error");
+  }
+  if (uid === state.user?.uid) return toast("لا يمكن سحب صلاحية حسابك الحالي من هنا.", "error");
+  if (!confirm("هل تريد سحب صلاحية Admin من هذا الحساب؟")) return;
+  try {
+    await remote.firebase.revokeAdmin(uid);
+    toast("تم سحب صلاحية Admin");
   } catch (error) {
     console.error(error);
     toast(getFirebaseErrorMessage(error), "error");

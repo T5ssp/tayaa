@@ -1130,6 +1130,56 @@ textarea.control {
   color: #9d2535;
 }
 
+.admin-access-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-access-panel .panel__head p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.admin-role-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(160px, 0.8fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-users-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 18px;
+  min-width: 0;
+}
+
+.admin-users-grid h3 {
+  margin: 0 0 12px;
+  color: var(--burgundy);
+}
+
+.admin-badge {
+  display: inline-grid;
+  place-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(75, 8, 16, 0.08);
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.admin-badge.is-admin {
+  background: rgba(216, 168, 76, 0.20);
+  color: var(--burgundy);
+}
+
+.admin-note {
+  color: var(--muted);
+  font-weight: 900;
+}
+
 .recaptcha-box {
   display: grid;
   place-items: center;
@@ -1193,6 +1243,8 @@ textarea.control {
   .cart-layout,
   .checkout-layout,
   .admin-grid,
+  .admin-users-grid,
+  .admin-role-form,
   .contact-grid {
     grid-template-columns: 1fr;
   }

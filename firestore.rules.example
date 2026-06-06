@@ -2,16 +2,41 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function bootstrapAdmin() {
+      return signedIn() && request.auth.token.email == "admin@tayya.om";
+    }
+
+    function claimAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function roleAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return claimAdmin() || roleAdmin() || bootstrapAdmin();
+    }
+
     match /products/{productId} {
       allow read: if true;
-      allow create, update, delete: if request.auth != null
-        && request.auth.token.admin == true;
+      allow create, update, delete: if isAdmin();
     }
 
     match /users/{userId} {
-      allow read, update, create: if request.auth != null
-        && request.auth.uid == userId;
-      allow delete: if false;
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow create, update: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{adminId} {
+      allow read: if signedIn() && (request.auth.uid == adminId || isAdmin());
+      allow create, update, delete: if isAdmin();
     }
   }
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "tayya-cache-v32";
+const CACHE_NAME = "tayya-cache-v33";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
@@ -30,6 +30,9 @@ const STATIC_ASSETS = [
   "./404.html",
   "./edits.html",
   "./boot-guard.js",
+  "./firebase-config.example.js",
+  "./firebase-store.js",
+  "./firestore.rules.example",
   "./storefront.css",
   "./storefront.js",
   "./luxury-upgrade.css",
@@ -49,7 +52,13 @@ const STATIC_ASSETS = [
   "./site.webmanifest",
   "./icon.svg",
   "./robots.txt",
-  "./mandoos-sitemap.xml"
+  "./mandoos-sitemap.xml",
+  "./assets/products/kummah-shop.jpg",
+  "./assets/products/kummah-souq.jpg",
+  "./assets/products/khanjar-belt.jpg",
+  "./assets/products/khanjar-belt-2.jpg",
+  "./assets/products/silver-cane-clean.jpg",
+  "./assets/products/walking-stick-2.jpg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -70,6 +79,9 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith("/firebase-config.js")) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const networkFetch = fetch(event.request)

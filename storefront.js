@@ -19,14 +19,14 @@ const STORAGE = {
 
 const CATEGORY_META = {
   "الكميم": { href: "kummah.html", icon: "fa-shirt", intro: "كميم مختارة بتطريز هادئ ولمسة عمانية أنيقة." },
-  "المصار": { href: "massar.html", icon: "fa-crown", intro: "مصار فاخرة للمناسبات اليومية والرسمية." },
-  "العصي": { href: "sticks.html", icon: "fa-wand-magic-sparkles", intro: "عصي راقية بتفاصيل كلاسيكية متوازنة." },
+  "المصار": { href: "massar.html", icon: "fa-crown", intro: "أحزمة عمانية بتفاصيل تراثية ولمسات فاخرة للمناسبات." },
+  "العصي": { href: "sticks.html", icon: "fa-wand-magic-sparkles", intro: "عصي راقية بتفاصيل فضية وكلاسيكية متوازنة." },
   "الأحذية": { href: "shoes.html", icon: "fa-shoe-prints", intro: "أحذية جلدية منتقاة لإطلالة كاملة." },
   "العطور": { href: "perfumes.html", icon: "fa-spray-can-sparkles", intro: "عطور بخطوط دافئة وفاخرة وثبات أجمل." },
   "الحسابات": { href: "accounts.html", icon: "fa-layer-group", intro: "حسابات رقمية وخدمات جاهزة بتجربة شراء واضحة." }
 };
 
-const PRODUCTS = [
+const DEFAULT_PRODUCTS = [
   {
     id: "perfume-oud-01",
     category: "العطور",
@@ -57,7 +57,7 @@ const PRODUCTS = [
     title: "كميم أحمر فاخر",
     price: 14.5,
     badge: "جديد",
-    image: "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&w=900&q=85",
+    image: "./assets/products/kummah-shop.jpg",
     description: "كميم بتفاصيل دقيقة وخامة مريحة تناسب الإطلالات العمانية.",
     material: "قطن مطرز",
     color: "أحمر",
@@ -69,7 +69,7 @@ const PRODUCTS = [
     title: "كميم أبيض ناعم",
     price: 12,
     badge: "أساسي",
-    image: "https://images.unsplash.com/photo-1622445275576-721325763afe?auto=format&fit=crop&w=900&q=85",
+    image: "./assets/products/kummah-souq.jpg",
     description: "تصميم أبيض هادئ وخفيف، مناسب للاستخدام اليومي.",
     material: "قطن فاخر",
     color: "أبيض",
@@ -78,24 +78,24 @@ const PRODUCTS = [
   {
     id: "massar-royal-01",
     category: "المصار",
-    title: "مصر ملكي عاجي",
+    title: "حزام عماني مطرز",
     price: 32,
     badge: "مختار",
-    image: "https://images.unsplash.com/photo-1516762689617-e1cffcef479d?auto=format&fit=crop&w=900&q=85",
-    description: "مصر بخامة ناعمة ولمعان بسيط يمنح حضورًا فخمًا.",
-    material: "حرير مخلوط",
+    image: "./assets/products/khanjar-belt.jpg",
+    description: "حزام عماني مستوحى من تفاصيل الخناجر التقليدية بلمسة فضية فاخرة.",
+    material: "جلد وفضة",
     color: "عاجي",
     stock: 6
   },
   {
     id: "massar-brown-02",
     category: "المصار",
-    title: "مصر بني رسمي",
+    title: "حزام مصار رسمي",
     price: 27,
     badge: "رسمي",
-    image: "https://images.unsplash.com/photo-1520975682031-a62d2f1c7b08?auto=format&fit=crop&w=900&q=85",
-    description: "لون بني عميق ينسجم مع المناسبات والعمل.",
-    material: "نسيج فاخر",
+    image: "./assets/products/khanjar-belt-2.jpg",
+    description: "تفاصيل جلدية تقليدية تناسب الإطلالات الرسمية والهدايا.",
+    material: "جلد طبيعي",
     color: "بني",
     stock: 9
   },
@@ -105,9 +105,9 @@ const PRODUCTS = [
     title: "عصا خشب منقوشة",
     price: 18,
     badge: "حرفي",
-    image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?auto=format&fit=crop&w=900&q=85",
-    description: "عصا خفيفة بنقشة كلاسيكية ولمسة ذهبية بسيطة.",
-    material: "خشب طبيعي",
+    image: "./assets/products/silver-cane-clean.jpg",
+    description: "عصا خشبية بتفاصيل مستوحاة من مقابض الفضة الكلاسيكية.",
+    material: "خشب ومقبض فضي",
     color: "خشبي",
     stock: 10
   },
@@ -117,8 +117,8 @@ const PRODUCTS = [
     title: "عصا سوداء كلاسيكية",
     price: 21,
     badge: "أنيق",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=85",
-    description: "تصميم أسود رصين مناسب للهدايا والمناسبات.",
+    image: "./assets/products/walking-stick-2.jpg",
+    description: "تصميم أسود رصين بعصا خشبية فاخرة ومظهر رسمي.",
     material: "خشب مطلي",
     color: "أسود",
     stock: 7
@@ -173,6 +173,17 @@ const PRODUCTS = [
   }
 ];
 
+let PRODUCTS = [...DEFAULT_PRODUCTS];
+window.TAYYA_DEFAULT_PRODUCTS = DEFAULT_PRODUCTS;
+
+const remote = {
+  firebase: null,
+  configured: false,
+  productsLoaded: false,
+  productCount: 0,
+  products: []
+};
+
 let state = {
   cart: loadJson(STORAGE.cart, []),
   favorites: loadJson(STORAGE.favorites, []),
@@ -182,16 +193,54 @@ let state = {
   orders: loadJson(STORAGE.orders, [])
 };
 
+let phoneConfirmation = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   try {
     renderApp();
     registerEvents();
+    initFirebaseBridge();
     registerServiceWorker();
   } catch (error) {
     bootMonitor.errors.push(error?.message || String(error));
     window.__tayyaEmergencyBoot?.("تعذر تشغيل الواجهة الجديدة.");
   }
 });
+
+async function initFirebaseBridge() {
+  try {
+    remote.firebase = await import("./firebase-store.js");
+    remote.configured = remote.firebase.isFirebaseConfigured();
+    if (!remote.configured) return;
+
+    remote.firebase.onAuthStateChange((profile) => {
+      state.user = profile;
+      saveJson(STORAGE.user, profile);
+      if (profile?.addresses) {
+        state.addresses = profile.addresses;
+        saveJson(STORAGE.addresses, state.addresses);
+      }
+      if (profile?.orders) {
+        state.orders = profile.orders;
+        saveJson(STORAGE.orders, state.orders);
+      }
+      renderApp();
+    }).catch((error) => console.warn("Firebase auth sync failed", error));
+
+    remote.firebase.subscribeProducts((items) => {
+      remote.productsLoaded = true;
+      remote.productCount = items.length;
+      remote.products = items;
+      PRODUCTS = items.length ? items : [...DEFAULT_PRODUCTS];
+      renderApp();
+    }, (error) => {
+      console.warn("Firebase products sync failed", error);
+      toast("تعذر مزامنة المنتجات من Firebase، تم عرض البيانات التجريبية.", "error");
+    }).catch((error) => console.warn("Firebase products listener failed", error));
+  } catch (error) {
+    console.warn("Firebase bridge unavailable", error);
+  }
+}
 
 function renderApp() {
   const app = document.getElementById("app");
@@ -291,8 +340,8 @@ function renderPage(route) {
   if (route === "contact") return renderContactPage();
   if (route === "faq") return renderFaqPage();
   if (route === "terms") return renderInfoPage("الشروط والأحكام", "الأسعار بالريال العماني، ويتم تأكيد الطلب والتواصل مع العميل قبل التجهيز والشحن.");
-  if (route === "privacy") return renderInfoPage("سياسة الخصوصية", "نحفظ بيانات الحساب والعناوين والطلبات محليًا في هذه النسخة التجريبية، ولا نعرض بياناتك لأي طرف آخر.");
-  if (route.startsWith("admin")) return renderInfoPage("لوحة الإدارة", "هذه الواجهة مركزة الآن على تجربة العميل. يمكن بناء لوحة إدارة مستقلة لاحقًا عند ربط قاعدة بيانات آمنة.");
+  if (route === "privacy") return renderInfoPage("سياسة الخصوصية", "نحفظ بيانات الحساب والعناوين والطلبات داخل المتصفح، ومع تفعيل Firebase يتم حفظها في Firestore حسب قواعد الحماية الخاصة بالمشروع.");
+  if (route.startsWith("admin")) return renderAdminPage();
   return renderInfoPage("الصفحة غير موجودة", "لم نعثر على الصفحة المطلوبة.", "index.html", "العودة للرئيسية");
 }
 
@@ -533,6 +582,8 @@ function renderAuthShell(title, subtitle, mode) {
         </form>
         <form class="phone-login" id="phone-login-form">
           <input class="control" name="phone" type="tel" placeholder="+968 9X XXX XXX" required>
+          <input class="control" name="code" inputmode="numeric" placeholder="رمز التحقق بعد وصول الرسالة">
+          <div id="recaptcha-container" class="recaptcha-box"></div>
           <button class="btn btn--light" type="submit"><i class="fas fa-mobile-screen"></i> الدخول برقم الجوال</button>
         </form>
         <a class="auth-switch" href="${mode === "login" ? "register.html" : "login.html"}">${mode === "login" ? "ليس لديك حساب؟ إنشاء حساب" : "لديك حساب؟ تسجيل الدخول"}</a>
@@ -663,7 +714,7 @@ function renderFaqPage() {
   const faqs = [
     ["كيف أطلب؟", "أضف المنتج للسلة ثم أكمل بيانات التوصيل من صفحة الدفع."],
     ["ماذا تحتوي صفحة الحساب؟", "معلومات الحساب، العناوين المحفوظة، وسجل الطلبات فقط."],
-    ["هل الدخول عبر Google وFacebook حقيقي؟", "الواجهة جاهزة، والربط الحقيقي يحتاج إعداد مزودات آمنة مثل Firebase أو خادم خلفي."]
+    ["هل الدخول عبر Google وFacebook حقيقي؟", "نعم عند تعبئة firebase-config.js وتفعيل مزودات الدخول داخل Firebase Authentication."]
   ];
   return `<section class="narrow-page">${faqs.map(([q, a]) => `<article class="panel faq"><h2>${q}</h2><p>${a}</p></article>`).join("")}</section>`;
 }
@@ -674,6 +725,163 @@ function renderInfoPage(title, text, href = "index.html", label = "العودة 
       <h1>${title}</h1>
       <p>${text}</p>
       <a class="btn btn--primary" href="${href}">${label}</a>
+    </section>
+  `;
+}
+
+function renderAdminPage() {
+  if (!remote.configured) {
+    return `
+      <section class="page-title">
+        <span>Admin / Firebase</span>
+        <h1>لوحة إدارة المنتجات</h1>
+        <p>اللوحة جاهزة، وتحتاج فقط إلى تعبئة إعدادات Firebase وتشغيل قواعد الحماية.</p>
+      </section>
+      <section class="admin-layout">
+        <article class="panel admin-status admin-status--warn">
+          <i class="fas fa-database"></i>
+          <div>
+            <h2>Firebase غير مفعل بعد</h2>
+            <p>افتح ملف firebase-config.js وضع بيانات مشروعك، ثم فعّل Authentication وFirestore. بدون config لن نعرض أزرار تعديل حقيقية حتى لا نخدعك بواجهة وهمية.</p>
+          </div>
+        </article>
+        <article class="panel admin-code">
+          <h2>الحقول المطلوبة للمنتج</h2>
+          <pre><code>{
+  "name": "الكَمِيم العماني",
+  "price": 5,
+  "image": "URL للصورة",
+  "category": "الكميم"
+}</code></pre>
+        </article>
+      </section>
+    `;
+  }
+
+  if (!state.user) return renderAdminLogin();
+
+  if (!state.user.isAdmin) {
+    return `
+      <section class="auth-page">
+        <div class="auth-card">
+          <span class="auth-avatar"><i class="fas fa-lock"></i></span>
+          <h1>صلاحية المسؤول مطلوبة</h1>
+          <p>هذا الحساب مسجل، لكنه لا يحمل صلاحية Admin. أضف البريد في firebase-config.js للواجهة، واضبط Custom Claim في Firebase للحماية الحقيقية.</p>
+          <button class="btn btn--light" type="button" data-logout>تسجيل الخروج</button>
+        </div>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="page-title">
+      <span>Admin / Products</span>
+      <h1>لوحة إدارة المنتجات</h1>
+      <p>إضافة وتعديل وحذف المنتجات من Firestore. أي تغيير يظهر مباشرة في واجهة المتجر.</p>
+    </section>
+    <section class="admin-layout">
+      <article class="panel admin-status">
+        <i class="fas fa-circle-check"></i>
+        <div>
+          <h2>متصل بـ Firebase</h2>
+          <p>${remote.productCount ? `يتم عرض ${remote.productCount} منتج من قاعدة البيانات.` : "قاعدة المنتجات فارغة حالياً، يمكنك إضافة منتج أو نسخ المنتجات التجريبية."}</p>
+        </div>
+        ${remote.productCount ? "" : '<button class="btn btn--gold" type="button" data-admin-seed>نسخ المنتجات التجريبية</button>'}
+      </article>
+      <div class="admin-grid">
+        ${renderAdminProductForm()}
+        ${renderAdminProductsTable()}
+      </div>
+    </section>
+  `;
+}
+
+function renderAdminLogin() {
+  return `
+    <section class="auth-page">
+      <div class="auth-card">
+        <span class="auth-avatar"><i class="fas fa-user-shield"></i></span>
+        <h1>تسجيل دخول المسؤول</h1>
+        <p>الدخول هنا للمسؤول فقط. استخدم بريد Admin أو Google Admin المصرح في Firebase.</p>
+        <div class="social-login">
+          <button type="button" data-admin-provider-login="google"><i class="fab fa-google"></i> Google Admin</button>
+          <button type="button" data-admin-provider-login="facebook"><i class="fab fa-facebook-f"></i> Facebook Admin</button>
+        </div>
+        <div class="divider"><span>أو عبر البريد وكلمة المرور</span></div>
+        <form class="form-stack" id="admin-login-form">
+          <input class="control" name="email" type="email" placeholder="بريد المسؤول" required>
+          <input class="control" name="password" type="password" placeholder="كلمة المرور" required>
+          <button class="btn btn--primary" type="submit">دخول لوحة الإدارة</button>
+        </form>
+      </div>
+    </section>
+  `;
+}
+
+function renderAdminProductForm(product = null) {
+  const editing = product || null;
+  const categoryOptions = Object.keys(CATEGORY_META).map((category) =>
+    `<option value="${escapeAttr(category)}" ${editing?.category === category ? "selected" : ""}>${category}</option>`
+  ).join("");
+
+  return `
+    <form class="panel form-stack admin-product-form" id="admin-product-form">
+      <div class="panel__head">
+        <h2>${editing ? "تعديل المنتج" : "إضافة منتج"}</h2>
+        ${editing ? '<button class="link-button" type="button" data-admin-cancel>إلغاء</button>' : ""}
+      </div>
+      <input type="hidden" name="id" value="${escapeAttr(editing?.id || "")}">
+      <input class="control" name="name" placeholder="اسم المنتج" value="${escapeAttr(editing?.title || "")}" required>
+      <select class="control" name="category" required>${categoryOptions}</select>
+      <input class="control" name="price" type="number" min="0" step="0.1" placeholder="السعر" value="${escapeAttr(editing?.price || "")}" required>
+      <input class="control" name="image" type="url" placeholder="رابط الصورة" value="${escapeAttr(editing?.image || "")}" required>
+      <input class="control" name="badge" placeholder="وسم قصير" value="${escapeAttr(editing?.badge || "متوفر")}">
+      <div class="form-row">
+        <input class="control" name="material" placeholder="الخامة" value="${escapeAttr(editing?.material || "")}">
+        <input class="control" name="color" placeholder="اللون" value="${escapeAttr(editing?.color || "")}">
+      </div>
+      <input class="control" name="stock" type="number" min="0" step="1" placeholder="المخزون" value="${escapeAttr(editing?.stock || 0)}">
+      <textarea class="control" name="description" placeholder="وصف المنتج">${editing?.description || ""}</textarea>
+      <button class="btn btn--primary" type="submit">${editing ? "حفظ التعديل" : "إضافة المنتج"}</button>
+    </form>
+  `;
+}
+
+function renderAdminProductsTable() {
+  const adminProducts = remote.productsLoaded ? remote.products : [];
+  const rows = adminProducts.map((product) => `
+    <tr>
+      <td><img class="admin-thumb" src="${product.image}" alt="${escapeAttr(product.title)}"></td>
+      <td><strong>${product.title}</strong><small>${product.id}</small></td>
+      <td>${product.category}</td>
+      <td>${formatPrice(product.price)}</td>
+      <td class="admin-actions">
+        <button type="button" data-admin-edit="${escapeAttr(product.id)}"><i class="fas fa-pen"></i> تعديل</button>
+        <button type="button" data-admin-delete="${escapeAttr(product.id)}"><i class="fas fa-trash"></i> حذف</button>
+      </td>
+    </tr>
+  `).join("");
+
+  return `
+    <section class="panel admin-products-panel">
+      <div class="panel__head">
+        <h2>كل المنتجات</h2>
+        <button class="btn btn--light" type="button" data-admin-new>إضافة منتج</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>الصورة</th>
+              <th>اسم المنتج</th>
+              <th>الفئة</th>
+              <th>السعر</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>${rows || '<tr><td colspan="5">لا توجد منتجات في قاعدة البيانات.</td></tr>'}</tbody>
+        </table>
+      </div>
     </section>
   `;
 }
@@ -720,7 +928,7 @@ function registerEvents() {
 }
 
 function handleClick(event) {
-  const target = event.target.closest("[data-add-cart], [data-favorite], [data-compare], [data-cart-qty], [data-remove-cart], [data-provider-login], [data-logout], [data-remove-address], [data-reset-filters], [data-step-qty], [data-open-favorites], [data-open-compare]");
+  const target = event.target.closest("[data-add-cart], [data-favorite], [data-compare], [data-cart-qty], [data-remove-cart], [data-provider-login], [data-admin-provider-login], [data-admin-edit], [data-admin-delete], [data-admin-new], [data-admin-cancel], [data-admin-seed], [data-logout], [data-remove-address], [data-reset-filters], [data-step-qty], [data-open-favorites], [data-open-compare]");
   if (!target) return;
 
   if (target.dataset.addCart) {
@@ -732,6 +940,11 @@ function handleClick(event) {
   if (target.dataset.cartQty) updateCartQty(target.dataset.cartQty, Number(target.dataset.delta || 1));
   if (target.dataset.removeCart) removeCart(target.dataset.removeCart);
   if (target.dataset.providerLogin) loginUser({ provider: target.dataset.providerLogin });
+  if (target.dataset.adminProviderLogin) loginAdmin({ provider: target.dataset.adminProviderLogin });
+  if (target.dataset.adminEdit) editAdminProduct(target.dataset.adminEdit);
+  if (target.dataset.adminDelete) deleteAdminProduct(target.dataset.adminDelete);
+  if (target.dataset.adminNew !== undefined || target.dataset.adminCancel !== undefined) resetAdminForm();
+  if (target.dataset.adminSeed !== undefined) seedAdminProducts();
   if (target.dataset.logout !== undefined) logoutUser();
   if (target.dataset.removeAddress) removeAddress(Number(target.dataset.removeAddress));
   if (target.dataset.resetFilters !== undefined) resetFilters();
@@ -751,18 +964,25 @@ function handleSubmit(event) {
   if (form.id === "login-form" || form.id === "register-form") {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(form));
-    loginUser({ name: data.name, email: data.email, phone: data.phone, provider: "email" });
+    loginUser({ name: data.name, email: data.email, password: data.password, phone: data.phone, provider: "email", mode: form.id === "register-form" ? "register" : "login" });
   }
   if (form.id === "phone-login-form") {
     event.preventDefault();
     const phone = String(new FormData(form).get("phone") || "").trim();
     if (!/^\+\d{7,}/.test(phone)) return toast("أدخل رقم الهاتف بصيغة دولية مثل +968...", "error");
-    loginUser({ phone, provider: "phone" });
+    const code = String(new FormData(form).get("code") || "").trim();
+    loginUser({ phone, code, provider: "phone" });
+  }
+  if (form.id === "admin-login-form") {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(form));
+    loginAdmin({ email: data.email, password: data.password, provider: "email" });
   }
   if (form.id === "account-form") {
     event.preventDefault();
     state.user = { ...state.user, ...Object.fromEntries(new FormData(form)) };
     saveJson(STORAGE.user, state.user);
+    saveRemoteUserData();
     toast("تم حفظ بيانات الحساب");
     renderApp();
   }
@@ -772,8 +992,13 @@ function handleSubmit(event) {
     if (!data.address) return toast("اكتب العنوان أولًا", "error");
     state.addresses.push({ label: data.label || "عنوان محفوظ", address: data.address });
     saveJson(STORAGE.addresses, state.addresses);
+    saveRemoteUserData();
     toast("تم حفظ العنوان");
     renderApp();
+  }
+  if (form.id === "admin-product-form") {
+    event.preventDefault();
+    saveAdminProduct(Object.fromEntries(new FormData(form)));
   }
   if (form.id === "checkout-form") {
     event.preventDefault();
@@ -817,7 +1042,41 @@ function resetFilters() {
   filterCatalog();
 }
 
-function loginUser(data = {}) {
+async function loginUser(data = {}) {
+  if (remote.configured && remote.firebase) {
+    try {
+      let profile = null;
+      if (data.provider === "google") profile = await remote.firebase.signInWithGoogle();
+      if (data.provider === "facebook") profile = await remote.firebase.signInWithFacebook();
+      if (data.provider === "email") {
+        profile = data.mode === "register"
+          ? await remote.firebase.registerWithEmail(data.email, data.password, data.name)
+          : await remote.firebase.signInWithEmail(data.email, data.password);
+      }
+      if (data.provider === "phone") {
+        if (!phoneConfirmation) {
+          phoneConfirmation = await remote.firebase.sendPhoneCode(data.phone, "recaptcha-container");
+          toast("تم إرسال رمز التحقق. أدخل الرمز ثم اضغط الدخول مرة أخرى.");
+          return;
+        }
+        if (!data.code) return toast("أدخل رمز التحقق المرسل إلى الجوال.", "error");
+        profile = await remote.firebase.confirmPhoneCode(phoneConfirmation, data.code);
+        phoneConfirmation = null;
+      }
+      if (profile) {
+        state.user = profile;
+        saveJson(STORAGE.user, state.user);
+        await saveRemoteUserData();
+        toast("تم تسجيل الدخول");
+        window.location.href = "account.html";
+      }
+      return;
+    } catch (error) {
+      console.error(error);
+      return toast(getFirebaseErrorMessage(error), "error");
+    }
+  }
+
   const providerLabels = { google: "Google", facebook: "Facebook", phone: "رقم الجوال", email: "البريد" };
   state.user = {
     name: data.name || data.email?.split("@")[0] || data.phone || providerLabels[data.provider] || "عميل طَيّة",
@@ -830,11 +1089,111 @@ function loginUser(data = {}) {
   window.location.href = "account.html";
 }
 
-function logoutUser() {
+async function logoutUser() {
+  if (remote.configured && remote.firebase) {
+    await remote.firebase.signOutUser().catch(() => null);
+  }
   state.user = null;
   saveJson(STORAGE.user, null);
   toast("تم تسجيل الخروج");
   window.location.href = "login.html";
+}
+
+async function loginAdmin(data = {}) {
+  if (!remote.configured || !remote.firebase) return toast("فعّل Firebase أولاً من firebase-config.js", "error");
+  try {
+    const profile = data.provider === "google"
+      ? await remote.firebase.signInWithGoogle()
+      : data.provider === "facebook"
+        ? await remote.firebase.signInWithFacebook()
+        : await remote.firebase.signInWithEmail(data.email, data.password);
+    state.user = profile;
+    saveJson(STORAGE.user, profile);
+    toast(profile.isAdmin ? "مرحباً بالمسؤول" : "تم الدخول، لكن هذا الحساب ليس Admin");
+    renderApp();
+  } catch (error) {
+    console.error(error);
+    toast(getFirebaseErrorMessage(error), "error");
+  }
+}
+
+async function saveRemoteUserData() {
+  if (!remote.configured || !remote.firebase || !state.user) return;
+  await remote.firebase.saveUserProfile(state.user, {
+    addresses: state.addresses,
+    orders: state.orders
+  }).catch((error) => console.warn("User profile sync failed", error));
+}
+
+async function saveAdminProduct(data) {
+  if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
+    return toast("لا توجد صلاحية لإدارة المنتجات.", "error");
+  }
+  const product = {
+    name: String(data.name || "").trim(),
+    title: String(data.name || "").trim(),
+    category: String(data.category || "").trim(),
+    price: Number(data.price || 0),
+    image: String(data.image || "").trim(),
+    badge: String(data.badge || "متوفر").trim(),
+    description: String(data.description || "").trim(),
+    material: String(data.material || "").trim(),
+    color: String(data.color || "").trim(),
+    stock: Number(data.stock || 0)
+  };
+  if (!product.name || !product.category || !product.image) {
+    return toast("أكمل اسم المنتج والفئة والصورة.", "error");
+  }
+  try {
+    if (data.id) await remote.firebase.updateProduct(data.id, product);
+    else await remote.firebase.addProduct(product);
+    toast(data.id ? "تم تعديل المنتج" : "تمت إضافة المنتج");
+    resetAdminForm();
+  } catch (error) {
+    console.error(error);
+    toast(getFirebaseErrorMessage(error), "error");
+  }
+}
+
+function editAdminProduct(id) {
+  const product = getProduct(id);
+  if (!product) return toast("لم يتم العثور على المنتج.", "error");
+  const form = document.getElementById("admin-product-form");
+  if (!form) return;
+  form.outerHTML = renderAdminProductForm(product);
+  document.getElementById("admin-product-form")?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function resetAdminForm() {
+  const form = document.getElementById("admin-product-form");
+  if (form) form.outerHTML = renderAdminProductForm();
+}
+
+async function deleteAdminProduct(id) {
+  if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
+    return toast("لا توجد صلاحية لحذف المنتجات.", "error");
+  }
+  if (!confirm("هل تريد حذف المنتج نهائياً؟")) return;
+  try {
+    await remote.firebase.deleteProduct(id);
+    toast("تم حذف المنتج");
+  } catch (error) {
+    console.error(error);
+    toast(getFirebaseErrorMessage(error), "error");
+  }
+}
+
+async function seedAdminProducts() {
+  if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
+    return toast("لا توجد صلاحية لإضافة المنتجات.", "error");
+  }
+  try {
+    await remote.firebase.seedProducts(DEFAULT_PRODUCTS);
+    toast("تم نسخ المنتجات التجريبية إلى Firestore");
+  } catch (error) {
+    console.error(error);
+    toast(getFirebaseErrorMessage(error), "error");
+  }
 }
 
 function createOrder(data) {
@@ -853,6 +1212,7 @@ function createOrder(data) {
   saveJson(STORAGE.orders, state.orders);
   saveJson(STORAGE.addresses, state.addresses);
   saveJson(STORAGE.cart, state.cart);
+  saveRemoteUserData();
   toast(`تم إنشاء الطلب ${order.number}`);
   window.location.href = "account.html";
 }
@@ -896,6 +1256,7 @@ function toggleList(key, storageKey, id, label, limit = Infinity) {
 function removeAddress(index) {
   state.addresses.splice(index, 1);
   saveJson(STORAGE.addresses, state.addresses);
+  saveRemoteUserData();
   renderApp();
 }
 
@@ -937,6 +1298,18 @@ function toast(message, type = "success") {
     node.classList.remove("is-visible");
     setTimeout(() => node.remove(), 250);
   }, 2400);
+}
+
+function getFirebaseErrorMessage(error) {
+  const code = error?.code || "";
+  if (code.includes("auth/popup")) return "تعذر فتح نافذة تسجيل الدخول، جرّب مرة أخرى أو تحقق من إعدادات المتصفح.";
+  if (code.includes("auth/invalid-credential") || code.includes("auth/wrong-password")) return "بيانات الدخول غير صحيحة.";
+  if (code.includes("auth/user-not-found")) return "لا يوجد حساب بهذا البريد.";
+  if (code.includes("auth/email-already-in-use")) return "هذا البريد مسجل مسبقاً.";
+  if (code.includes("auth/invalid-phone-number")) return "رقم الجوال غير صحيح. استخدم الصيغة الدولية مثل +968.";
+  if (code.includes("auth/invalid-verification-code")) return "رمز التحقق غير صحيح.";
+  if (code.includes("permission-denied")) return "لا توجد صلاحية لتنفيذ هذه العملية. تحقق من Firestore Rules وصلاحية Admin.";
+  return error?.message || "حدث خطأ غير متوقع.";
 }
 
 function loadJson(key, fallback) {

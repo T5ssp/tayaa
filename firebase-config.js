@@ -1,4 +1,3 @@
-// firebase-config.js
 export const firebaseConfig = {
   apiKey: "AIzaSyBMDwwgiZ1i7jgysd3ez3Pnn7DgT80LGd8",
   authDomain: "mandoos-store.firebaseapp.com",

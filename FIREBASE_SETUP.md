@@ -6,9 +6,11 @@
    - Google
    - Facebook, if you have a Facebook app configured
    - Phone, with the domain added to Firebase authorized domains
+   - Apple, if you have Apple Developer Sign in with Apple configured
 3. Add these authorized domains in Firebase Authentication:
    - `localhost`
    - `t5ssp.github.io`
+   - Firebase accepts domains only, so `t5ssp.github.io` covers `/tayaa`.
 4. Open Firebase Console, then go to Project settings -> General -> Your apps -> Web app.
 5. Copy the Web SDK config into `firebase-config.js`.
    - Keep `projectId` as `mandoos-store`.
@@ -20,6 +22,8 @@
    - Email: `admin@tayya.om`
    - Or replace this email in both `firebase-config.js` and `firestore.rules.example` with your real admin email.
 8. Open `admin.html`, sign in with that first admin, then use the "المسؤولون والصلاحيات" section to grant Admin access to other users.
+9. To restore deleted products, open `admin.html` as Admin and click "استعادة المنتجات الأصلية".
+10. To send order emails automatically, install Firebase Trigger Email extension and use `mail` as the collection path. See `ORDER_NOTIFICATIONS.md`.
 
 Optional: you can also give the admin user a custom claim:
 
@@ -31,6 +35,7 @@ await admin.auth().setCustomUserClaims(uid, { admin: true });
 
 - `request.auth.token.admin == true`
 - an admin document at `admins/{uid}`
+- an admin document at `admins/{email}`
 - the bootstrap email in `firestore.rules.example`
 
 Never upload a Firebase service account JSON file to GitHub Pages or the public repository. Use service account keys only on a private server or local admin script.

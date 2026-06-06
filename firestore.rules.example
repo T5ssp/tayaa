@@ -7,7 +7,9 @@ service cloud.firestore {
     }
 
     function bootstrapAdmin() {
-      return signedIn() && request.auth.token.email == "admin@tayya.om";
+      return signedIn()
+        && request.auth.token.email is string
+        && request.auth.token.email == "admin@tayya.om";
     }
 
     function claimAdmin() {
@@ -16,11 +18,31 @@ service cloud.firestore {
 
     function roleAdmin() {
       return signedIn()
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+        && (
+          exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+          || (
+            request.auth.token.email is string
+            && exists(/databases/$(database)/documents/admins/$(request.auth.token.email))
+          )
+        );
     }
 
     function isAdmin() {
       return claimAdmin() || roleAdmin() || bootstrapAdmin();
+    }
+
+    function validOwnUserWrite(userId) {
+      return signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly([
+          "name",
+          "email",
+          "phone",
+          "provider",
+          "addresses",
+          "orders",
+          "updatedAt"
+        ]);
     }
 
     match /products/{productId} {
@@ -30,17 +52,33 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
-      allow create, update: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow create, update: if isAdmin() || validOwnUserWrite(userId);
       allow delete: if isAdmin();
     }
 
     match /orders/{orderId} {
       allow read, update, delete: if isAdmin();
-      allow create: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.adminEmail == "bader2233062@gmail.com";
+    }
+
+    match /mail/{mailId} {
+      allow read, update, delete: if isAdmin();
+      allow create: if signedIn()
+        && request.resource.data.to is list
+        && request.resource.data.to.size() == 1
+        && request.resource.data.to[0] == "bader2233062@gmail.com"
+        && request.resource.data.message.subject is string;
     }
 
     match /admins/{adminId} {
-      allow read: if signedIn() && (request.auth.uid == adminId || isAdmin());
+      allow read: if signedIn()
+        && (
+          request.auth.uid == adminId
+          || (request.auth.token.email is string && request.auth.token.email == adminId)
+          || isAdmin()
+        );
       allow create, update, delete: if isAdmin();
     }
   }

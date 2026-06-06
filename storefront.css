@@ -987,9 +987,83 @@ textarea.control {
   display: none;
 }
 
+.admin-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(216, 168, 76, 0.14), transparent 30%),
+    linear-gradient(180deg, #fffaf3, #f7f0e6 46%, #fffaf3);
+}
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px max(20px, calc((100vw - var(--max)) / 2));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+  background: linear-gradient(135deg, var(--burgundy), var(--burgundy-2));
+  color: #fff8ec;
+  box-shadow: 0 14px 34px rgba(25, 4, 8, 0.18);
+}
+
+.admin-header .brand {
+  color: #fff8ec;
+}
+
+.admin-header__nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-header__nav a,
+.admin-header__nav button {
+  min-height: 40px;
+  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff8ec;
+  font-weight: 900;
+}
+
 .admin-layout {
   display: grid;
   gap: 18px;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-stats article {
+  min-height: 94px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-stats strong {
+  color: var(--burgundy);
+  font-size: 30px;
+}
+
+.admin-stats span {
+  color: var(--muted);
+  font-weight: 900;
 }
 
 .admin-grid {
@@ -1299,6 +1373,7 @@ textarea.control {
   .product-grid,
   .product-grid--home,
   .assurance,
+  .admin-stats,
   .footer-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1340,6 +1415,22 @@ textarea.control {
 
   .site-header {
     position: static;
+  }
+
+  .admin-header {
+    position: static;
+    display: grid;
+    padding: 12px;
+  }
+
+  .admin-header__nav {
+    justify-content: stretch;
+  }
+
+  .admin-header__nav a,
+  .admin-header__nav button {
+    flex: 1 1 46%;
+    justify-content: center;
   }
 
   .header-grid {
@@ -1430,6 +1521,7 @@ textarea.control {
   .category-strip,
   .product-grid,
   .product-grid--home,
+  .admin-stats,
   .footer-grid {
     grid-template-columns: 1fr;
   }

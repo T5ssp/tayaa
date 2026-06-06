@@ -157,7 +157,7 @@ export async function subscribeAdmins(callback, onError) {
   const ref = firestoreModule.collection(db, "admins");
   return firestoreModule.onSnapshot(ref, (snapshot) => {
     const admins = snapshot.docs
-      .map((docSnap) => ({ uid: docSnap.id, ...docSnap.data() }))
+      .map((docSnap) => ({ id: docSnap.id, uid: docSnap.data().uid || docSnap.id, ...docSnap.data() }))
       .sort((a, b) => String(a.email || a.name || "").localeCompare(String(b.email || b.name || ""), "ar"));
     callback(admins);
   }, onError);
@@ -205,7 +205,7 @@ export async function seedProducts(products) {
     const ref = firestoreModule.doc(db, "products", product.id);
     batch.set(ref, {
       ...cleanProduct(product),
-      createdAt: firestoreModule.serverTimestamp(),
+      restoredFromSeed: true,
       updatedAt: firestoreModule.serverTimestamp()
     }, { merge: true });
   });
@@ -215,34 +215,50 @@ export async function seedProducts(products) {
 export async function createOrder(order) {
   const { firestoreModule } = await ensureFirebase();
   const user = auth.currentUser;
-  const ref = firestoreModule.collection(db, "orders");
-  return firestoreModule.addDoc(ref, {
+  const orderRef = await firestoreModule.addDoc(firestoreModule.collection(db, "orders"), {
     ...order,
     userId: user?.uid || "",
     userEmail: user?.email || order.customer?.email || "",
+    adminEmail: "bader2233062@gmail.com",
+    notificationStatus: "queued",
     createdAt: firestoreModule.serverTimestamp(),
     updatedAt: firestoreModule.serverTimestamp()
   });
+  await queueOrderEmail(orderRef.id, order).catch((error) => {
+    console.warn("Order email queue failed", error);
+  });
+  return orderRef;
 }
 
 export async function grantAdmin(uid, data = {}) {
   const { firestoreModule } = await ensureFirebase();
   const current = auth.currentUser;
   if (!current) throw new Error("Admin login is required.");
-  const ref = firestoreModule.doc(db, "admins", uid);
-  return firestoreModule.setDoc(ref, {
-    uid,
+  const cleanUid = String(uid || "").trim();
+  const cleanEmail = String(data.email || "").trim().toLowerCase();
+  if (!cleanUid && !cleanEmail) throw new Error("UID or email is required.");
+  const payload = {
+    uid: cleanUid,
     name: String(data.name || "").trim(),
-    email: String(data.email || "").trim(),
+    email: cleanEmail,
     grantedBy: current.uid,
     grantedByEmail: current.email || "",
     updatedAt: firestoreModule.serverTimestamp()
-  }, { merge: true });
+  };
+  const batch = firestoreModule.writeBatch(db);
+  if (cleanUid) batch.set(firestoreModule.doc(db, "admins", cleanUid), payload, { merge: true });
+  if (cleanEmail) batch.set(firestoreModule.doc(db, "admins", cleanEmail), payload, { merge: true });
+  return batch.commit();
 }
 
-export async function revokeAdmin(uid) {
+export async function revokeAdmin(identifier, email = "") {
   const { firestoreModule } = await ensureFirebase();
-  return firestoreModule.deleteDoc(firestoreModule.doc(db, "admins", uid));
+  const batch = firestoreModule.writeBatch(db);
+  const cleanIdentifier = String(identifier || "").trim();
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  if (cleanIdentifier) batch.delete(firestoreModule.doc(db, "admins", cleanIdentifier));
+  if (cleanEmail && cleanEmail !== cleanIdentifier) batch.delete(firestoreModule.doc(db, "admins", cleanEmail));
+  return batch.commit();
 }
 
 async function toProfile(user) {
@@ -252,6 +268,8 @@ async function toProfile(user) {
   const adminSnap = await firestoreModule.getDoc(firestoreModule.doc(db, "admins", user.uid)).catch(() => null);
   const saved = savedSnap?.exists?.() ? savedSnap.data() : {};
   const email = user.email || saved.email || "";
+  const normalizedEmail = email.toLowerCase();
+  const adminEmailSnap = normalizedEmail ? await firestoreModule.getDoc(firestoreModule.doc(db, "admins", normalizedEmail)).catch(() => null) : null;
   return {
     uid: user.uid,
     name: saved.name || user.displayName || email.split("@")[0] || user.phoneNumber || "عميل طَيّة",
@@ -260,8 +278,36 @@ async function toProfile(user) {
     provider: user.providerData?.[0]?.providerId || saved.provider || "email",
     addresses: Array.isArray(saved.addresses) ? saved.addresses : [],
     orders: Array.isArray(saved.orders) ? saved.orders : [],
-    isAdmin: token.claims?.admin === true || adminSnap?.exists?.() === true || firebaseAdminEmails.includes(email)
+    isAdmin: token.claims?.admin === true || adminSnap?.exists?.() === true || adminEmailSnap?.exists?.() === true || firebaseAdminEmails.map((item) => item.toLowerCase()).includes(normalizedEmail)
   };
+}
+
+async function queueOrderEmail(orderId, order) {
+  const { firestoreModule } = await ensureFirebase();
+  const customer = order.customer || {};
+  const items = Array.isArray(order.items) ? order.items : [];
+  const text = [
+    `طلب جديد: ${order.number || orderId}`,
+    `العميل: ${customer.name || "-"}`,
+    `الجوال: ${customer.phone || "-"}`,
+    `البريد: ${customer.email || "-"}`,
+    `العنوان: ${customer.address || "-"}`,
+    `الدفع: ${order.paymentMethod || "-"}`,
+    `الإجمالي: ${order.total || 0} ر.ع`,
+    "",
+    "المنتجات:",
+    ...items.map((item) => `- ${item.title} x${item.qty} (${item.price} ر.ع)`)
+  ].join("\n");
+  return firestoreModule.addDoc(firestoreModule.collection(db, "mail"), {
+    to: ["bader2233062@gmail.com"],
+    message: {
+      subject: `طلب جديد من طَيّة ${order.number || orderId}`,
+      text,
+      html: text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll("\n", "<br>")
+    },
+    orderId,
+    createdAt: firestoreModule.serverTimestamp()
+  });
 }
 
 function cleanProduct(product) {

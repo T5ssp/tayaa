@@ -314,6 +314,12 @@ function renderApp() {
   const app = document.getElementById("app");
   if (!app) return;
   const route = getRoute();
+  if (route.startsWith("admin")) {
+    app.innerHTML = renderAdminShell(route);
+    bootMonitor.shell = true;
+    bootMonitor.page = true;
+    return;
+  }
   app.innerHTML = `
     <div class="site-shell">
       ${renderTopbar()}
@@ -328,6 +334,30 @@ function renderApp() {
   `;
   bootMonitor.shell = true;
   bootMonitor.page = true;
+}
+
+function renderAdminShell(route) {
+  return `
+    <div class="admin-shell">
+      <header class="admin-header">
+        <a class="brand" href="admin.html" aria-label="لوحة طية">
+          <span class="brand__seal">ط</span>
+          <span><strong>لوحة طَيّة</strong><small>إدارة مستقلة وآمنة</small></span>
+        </a>
+        <nav class="admin-header__nav" aria-label="تنقل الإدارة">
+          <a href="admin.html">المنتجات</a>
+          <a href="#admin-orders">الطلبات</a>
+          <a href="#admin-users">المستخدمون</a>
+          <a href="index.html">عرض المتجر</a>
+          ${state.user ? '<button type="button" data-logout>خروج</button>' : ""}
+        </nav>
+      </header>
+      <main class="page page--${escapeAttr(route)}">
+        ${renderPage(route)}
+      </main>
+      <div class="toast-stack" id="toast-stack"></div>
+    </div>
+  `;
 }
 
 function getRoute() {
@@ -878,10 +908,16 @@ function renderAdminPage() {
         <i class="fas fa-circle-check"></i>
         <div>
           <h2>متصل بـ Firebase</h2>
-          <p>${remote.productCount ? `يتم عرض ${remote.productCount} منتج من قاعدة البيانات.` : "قاعدة المنتجات فارغة حالياً، يمكنك إضافة منتج أو نسخ المنتجات التجريبية."}</p>
+          <p>${remote.productCount ? `يتم عرض ${remote.productCount} منتج من قاعدة البيانات.` : "قاعدة المنتجات فارغة حالياً. استخدم زر الاستعادة لإعادة المجموعة الأصلية."}</p>
         </div>
-        ${remote.productCount ? "" : '<button class="btn btn--gold" type="button" data-admin-seed>نسخ المنتجات التجريبية</button>'}
+        <button class="btn btn--gold" type="button" data-admin-seed>استعادة المنتجات الأصلية</button>
       </article>
+      <section class="admin-stats">
+        <article><strong>${remote.productCount || 0}</strong><span>منتج</span></article>
+        <article><strong>${remote.orders.length || 0}</strong><span>طلب</span></article>
+        <article><strong>${remote.users.length || 0}</strong><span>مستخدم</span></article>
+        <article><strong>${remote.admins.length || 0}</strong><span>مسؤول</span></article>
+      </section>
       <div class="admin-grid">
         ${renderAdminProductForm()}
         ${renderAdminProductsTable()}
@@ -984,15 +1020,15 @@ function renderAdminProductsTable() {
 }
 
 function renderAdminAccessPanel() {
-  const adminIds = new Set(remote.admins.map((admin) => admin.uid));
+  const admins = dedupeAdmins(remote.admins);
+  const adminIds = new Set(admins.flatMap((admin) => [admin.uid, admin.email, admin.id].filter(Boolean)));
   if (state.user?.uid && state.user.isAdmin && !adminIds.has(state.user.uid)) {
     adminIds.add(state.user.uid);
   }
 
-  const admins = remote.admins.length ? remote.admins : [];
   const users = remote.users.length ? remote.users : [];
   const userRows = users.map((user) => {
-    const isAdmin = adminIds.has(user.uid);
+    const isAdmin = adminIds.has(user.uid) || adminIds.has(String(user.email || "").toLowerCase());
     return `
       <tr>
         <td><strong>${escapeHtml(user.name || "مستخدم")}</strong><small>${escapeHtml(user.uid)}</small></td>
@@ -1000,7 +1036,7 @@ function renderAdminAccessPanel() {
         <td>${escapeHtml(user.phone || "-")}</td>
         <td><span class="admin-badge ${isAdmin ? "is-admin" : ""}">${isAdmin ? "Admin" : "User"}</span></td>
         <td class="admin-actions">
-          ${isAdmin ? "" : `<button type="button" data-admin-grant="${escapeAttr(user.uid)}"><i class="fas fa-user-shield"></i> منح صلاحية</button>`}
+          ${isAdmin ? "" : `<button type="button" data-admin-grant="${escapeAttr(user.uid)}" data-admin-grant-email="${escapeAttr(user.email || "")}" data-admin-grant-name="${escapeAttr(user.name || "")}"><i class="fas fa-user-shield"></i> منح صلاحية</button>`}
         </td>
       </tr>
     `;
@@ -1012,7 +1048,7 @@ function renderAdminAccessPanel() {
       <td>${escapeHtml(admin.email || "-")}</td>
       <td>${escapeHtml(admin.grantedByEmail || "-")}</td>
       <td class="admin-actions">
-        ${admin.uid === state.user?.uid ? '<span class="admin-note">حسابك الحالي</span>' : `<button type="button" data-admin-revoke="${escapeAttr(admin.uid)}"><i class="fas fa-user-minus"></i> سحب الصلاحية</button>`}
+        ${admin.uid === state.user?.uid || admin.email === state.user?.email ? '<span class="admin-note">حسابك الحالي</span>' : `<button type="button" data-admin-revoke="${escapeAttr(admin.id || admin.uid || admin.email)}" data-admin-revoke-email="${escapeAttr(admin.email || "")}"><i class="fas fa-user-minus"></i> سحب الصلاحية</button>`}
       </td>
     </tr>
   `).join("");
@@ -1026,7 +1062,7 @@ function renderAdminAccessPanel() {
         </div>
       </div>
       <form class="admin-role-form" id="admin-role-form">
-        <input class="control" name="uid" placeholder="UID المستخدم من Firebase" required>
+        <input class="control" name="uid" placeholder="UID المستخدم من Firebase">
         <input class="control" name="email" type="email" placeholder="البريد الإلكتروني">
         <input class="control" name="name" placeholder="اسم اختياري">
         <button class="btn btn--primary" type="submit">منح صلاحية Admin</button>
@@ -1060,7 +1096,7 @@ function renderAdminOrdersPanel() {
   const rows = orders.map((order) => {
     const customer = order.customer || {};
     const message = `طلب جديد ${order.number || order.id} - ${customer.name || "عميل"} - ${formatPrice(order.total || 0)}`;
-    const mailHref = `mailto:support@tayya.com?subject=${encodeURIComponent("طلب جديد من طَيّة")}&body=${encodeURIComponent(message)}`;
+    const mailHref = `mailto:bader2233062@gmail.com?subject=${encodeURIComponent("طلب جديد من طَيّة")}&body=${encodeURIComponent(message)}`;
     const whatsappHref = `https://wa.me/?text=${encodeURIComponent(message)}`;
     return `
       <tr>
@@ -1153,8 +1189,14 @@ function handleClick(event) {
   if (target.dataset.adminDelete) deleteAdminProduct(target.dataset.adminDelete);
   if (target.dataset.adminNew !== undefined || target.dataset.adminCancel !== undefined) resetAdminForm();
   if (target.dataset.adminSeed !== undefined) seedAdminProducts();
-  if (target.dataset.adminGrant) grantAdminUser({ uid: target.dataset.adminGrant });
-  if (target.dataset.adminRevoke) revokeAdminUser(target.dataset.adminRevoke);
+  if (target.dataset.adminGrant) {
+    grantAdminUser({
+      uid: target.dataset.adminGrant,
+      email: target.dataset.adminGrantEmail,
+      name: target.dataset.adminGrantName
+    });
+  }
+  if (target.dataset.adminRevoke) revokeAdminUser(target.dataset.adminRevoke, target.dataset.adminRevokeEmail);
   if (target.dataset.logout !== undefined) logoutUser();
   if (target.dataset.removeAddress) removeAddress(Number(target.dataset.removeAddress));
   if (target.dataset.resetFilters !== undefined) resetFilters();
@@ -1425,9 +1467,10 @@ async function seedAdminProducts() {
   if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
     return toast("لا توجد صلاحية لإضافة المنتجات.", "error");
   }
+  if (!confirm("سيتم استعادة المنتجات الأصلية إلى Firestore ودمجها مع الموجود. هل تريد المتابعة؟")) return;
   try {
     await remote.firebase.seedProducts(DEFAULT_PRODUCTS);
-    toast("تم نسخ المنتجات التجريبية إلى Firestore");
+    toast("تمت استعادة المنتجات الأصلية في Firestore");
   } catch (error) {
     console.error(error);
     toast(getFirebaseErrorMessage(error), "error");
@@ -1439,12 +1482,13 @@ async function grantAdminUser(data = {}) {
     return toast("لا توجد صلاحية لإدارة المسؤولين.", "error");
   }
   const uid = String(data.uid || "").trim();
-  if (!uid) return toast("أدخل UID المستخدم.", "error");
-  const knownUser = remote.users.find((user) => user.uid === uid) || {};
+  const email = String(data.email || "").trim().toLowerCase();
+  if (!uid && !email) return toast("أدخل UID أو بريد المستخدم.", "error");
+  const knownUser = remote.users.find((user) => user.uid === uid || String(user.email || "").toLowerCase() === email) || {};
   try {
     await remote.firebase.grantAdmin(uid, {
       name: data.name || knownUser.name || "",
-      email: data.email || knownUser.email || ""
+      email: email || knownUser.email || ""
     });
     toast("تم منح صلاحية Admin");
     document.getElementById("admin-role-form")?.reset();
@@ -1454,14 +1498,14 @@ async function grantAdminUser(data = {}) {
   }
 }
 
-async function revokeAdminUser(uid) {
+async function revokeAdminUser(uid, email = "") {
   if (!remote.configured || !remote.firebase || !state.user?.isAdmin) {
     return toast("لا توجد صلاحية لإدارة المسؤولين.", "error");
   }
-  if (uid === state.user?.uid) return toast("لا يمكن سحب صلاحية حسابك الحالي من هنا.", "error");
+  if (uid === state.user?.uid || email === state.user?.email) return toast("لا يمكن سحب صلاحية حسابك الحالي من هنا.", "error");
   if (!confirm("هل تريد سحب صلاحية Admin من هذا الحساب؟")) return;
   try {
-    await remote.firebase.revokeAdmin(uid);
+    await remote.firebase.revokeAdmin(uid, email);
     toast("تم سحب صلاحية Admin");
   } catch (error) {
     console.error(error);
@@ -1469,8 +1513,26 @@ async function revokeAdminUser(uid) {
   }
 }
 
+function dedupeAdmins(admins) {
+  const byKey = new Map();
+  admins.forEach((admin) => {
+    const key = admin.uid || admin.email || admin.id;
+    if (!key) return;
+    const existing = byKey.get(key) || {};
+    byKey.set(key, { ...existing, ...admin });
+  });
+  return [...byKey.values()];
+}
+
 async function createOrder(data) {
   if (!state.cart.length) return toast("السلة فارغة", "error");
+  if (remote.configured && remote.firebase && !state.user) {
+    toast("سجل دخولك أولاً لإتمام الطلب وحفظه في Firestore.", "error");
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 900);
+    return;
+  }
   const total = getCartTotal();
   const order = {
     number: `TY-${Math.floor(1000 + Math.random() * 9000)}`,

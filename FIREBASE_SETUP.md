@@ -9,12 +9,17 @@
 3. Add these authorized domains in Firebase Authentication:
    - `localhost`
    - `t5ssp.github.io`
-4. Copy `firebase-config.example.js` into `firebase-config.js`, then fill your Firebase web app config.
-5. Publish Firestore rules based on `firestore.rules.example`.
-6. Create the first admin account in Firebase Authentication:
+4. Open Firebase Console, then go to Project settings -> General -> Your apps -> Web app.
+5. Copy the Web SDK config into `firebase-config.js`.
+   - Keep `projectId` as `mandoos-store`.
+   - Fill the missing `apiKey`, `messagingSenderId`, and `appId`.
+   - Do not use the old leaked Google API key unless you rotated and restricted it.
+   - Do not paste a service account JSON file into the website.
+6. Publish Firestore rules based on `firestore.rules.example`.
+7. Create the first admin account in Firebase Authentication:
    - Email: `admin@tayya.om`
    - Or replace this email in both `firebase-config.js` and `firestore.rules.example` with your real admin email.
-7. Open `admin.html`, sign in with that first admin, then use the "المسؤولون والصلاحيات" section to grant Admin access to other users.
+8. Open `admin.html`, sign in with that first admin, then use the "المسؤولون والصلاحيات" section to grant Admin access to other users.
 
 Optional: you can also give the admin user a custom claim:
 

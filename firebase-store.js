@@ -14,7 +14,10 @@ let db = null;
 let recaptchaVerifier = null;
 
 export function isFirebaseConfigured() {
-  return Boolean(firebaseConfig?.apiKey && firebaseConfig?.authDomain && firebaseConfig?.projectId);
+  return ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"].every((key) => {
+    const value = String(firebaseConfig?.[key] || "").trim();
+    return value && !value.startsWith("PASTE_") && !value.startsWith("YOUR_");
+  });
 }
 
 async function ensureFirebase() {

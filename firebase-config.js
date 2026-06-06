@@ -1,5 +1,5 @@
 export const firebaseConfig = {
-  apiKey: "AIzaSyBMDwwgiZ1i7jgysd3ez3Pnn7DgT80LGd8",
+  apiKey: "API_KEY_FROM_FIREBASE",
   authDomain: "mandoos-store.firebaseapp.com",
   projectId: "mandoos-store",
   storageBucket: "mandoos-store.firebasestorage.app",

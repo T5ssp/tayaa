@@ -792,7 +792,7 @@ textarea.control {
 }
 
 .social-login button {
-  flex: 1;
+  flex: 1 1 140px;
   min-height: 48px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1126,6 +1126,20 @@ textarea.control {
   font-weight: 900;
 }
 
+.admin-actions a {
+  min-height: 38px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--burgundy);
+  font-weight: 900;
+}
+
 .admin-actions button:last-child {
   color: #9d2535;
 }
@@ -1184,6 +1198,37 @@ textarea.control {
   display: grid;
   place-items: center;
   min-height: 10px;
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.payment-methods label {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--burgundy);
+  font-weight: 900;
+}
+
+.payment-methods i {
+  font-size: 24px;
+  color: var(--gold);
+}
+
+.secure-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
 }
 
 .toast-stack {
@@ -1245,6 +1290,7 @@ textarea.control {
   .admin-grid,
   .admin-users-grid,
   .admin-role-form,
+  .payment-methods,
   .contact-grid {
     grid-template-columns: 1fr;
   }

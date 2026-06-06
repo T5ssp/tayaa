@@ -58,6 +58,14 @@ export async function signInWithFacebook() {
   return signInWithProvider(provider);
 }
 
+export async function signInWithApple() {
+  const { authModule } = await ensureFirebase();
+  const provider = new authModule.OAuthProvider("apple.com");
+  provider.addScope("email");
+  provider.addScope("name");
+  return signInWithProvider(provider);
+}
+
 export async function signInWithEmail(email, password) {
   const { authModule } = await ensureFirebase();
   const result = await authModule.signInWithEmailAndPassword(auth, email, password);
@@ -71,6 +79,13 @@ export async function registerWithEmail(email, password, name) {
   const profile = await toProfile(result.user);
   await saveUserProfile({ ...profile, name: name || profile.name });
   return { ...profile, name: name || profile.name };
+}
+
+export async function resetPassword(email) {
+  const { authModule } = await ensureFirebase();
+  return authModule.sendPasswordResetEmail(auth, email, {
+    url: `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, "")}login.html`
+  });
 }
 
 export async function sendPhoneCode(phone, containerId) {
@@ -148,6 +163,17 @@ export async function subscribeAdmins(callback, onError) {
   }, onError);
 }
 
+export async function subscribeOrders(callback, onError) {
+  const { firestoreModule } = await ensureFirebase();
+  const ref = firestoreModule.collection(db, "orders");
+  return firestoreModule.onSnapshot(ref, (snapshot) => {
+    const orders = snapshot.docs
+      .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+      .sort((a, b) => String(b.createdAt?.seconds || b.createdAt || "").localeCompare(String(a.createdAt?.seconds || a.createdAt || "")));
+    callback(orders);
+  }, onError);
+}
+
 export async function addProduct(product) {
   const { firestoreModule } = await ensureFirebase();
   const ref = firestoreModule.collection(db, "products");
@@ -184,6 +210,19 @@ export async function seedProducts(products) {
     }, { merge: true });
   });
   return batch.commit();
+}
+
+export async function createOrder(order) {
+  const { firestoreModule } = await ensureFirebase();
+  const user = auth.currentUser;
+  const ref = firestoreModule.collection(db, "orders");
+  return firestoreModule.addDoc(ref, {
+    ...order,
+    userId: user?.uid || "",
+    userEmail: user?.email || order.customer?.email || "",
+    createdAt: firestoreModule.serverTimestamp(),
+    updatedAt: firestoreModule.serverTimestamp()
+  });
 }
 
 export async function grantAdmin(uid, data = {}) {

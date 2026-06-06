@@ -184,10 +184,13 @@ const remote = {
   products: [],
   users: [],
   admins: [],
+  orders: [],
   userAccessLoaded: false,
   adminAccessLoaded: false,
+  ordersLoaded: false,
   unsubscribeUsers: null,
-  unsubscribeAdmins: null
+  unsubscribeAdmins: null,
+  unsubscribeOrders: null
 };
 
 let state = {
@@ -254,12 +257,16 @@ function syncAdminAccess() {
   if (!state.user?.isAdmin) {
     remote.users = [];
     remote.admins = [];
+    remote.orders = [];
     remote.userAccessLoaded = false;
     remote.adminAccessLoaded = false;
+    remote.ordersLoaded = false;
     remote.unsubscribeUsers?.();
     remote.unsubscribeAdmins?.();
+    remote.unsubscribeOrders?.();
     remote.unsubscribeUsers = null;
     remote.unsubscribeAdmins = null;
+    remote.unsubscribeOrders = null;
     return;
   }
 
@@ -287,6 +294,19 @@ function syncAdminAccess() {
     }).then((unsubscribe) => {
       remote.unsubscribeAdmins = unsubscribe;
     }).catch((error) => console.warn("Firebase admins listener failed", error));
+  }
+
+  if (!remote.unsubscribeOrders) {
+    remote.firebase.subscribeOrders((orders) => {
+      remote.orders = orders;
+      remote.ordersLoaded = true;
+      renderApp();
+    }, (error) => {
+      console.warn("Firebase orders sync failed", error);
+      toast("تعذر تحميل الطلبات. تحقق من قواعد Firestore.", "error");
+    }).then((unsubscribe) => {
+      remote.unsubscribeOrders = unsubscribe;
+    }).catch((error) => console.warn("Firebase orders listener failed", error));
   }
 }
 
@@ -382,6 +402,7 @@ function renderPage(route) {
   if (route === "checkout") return renderCheckoutPage();
   if (route === "login") return renderLoginPage();
   if (route === "register") return renderRegisterPage();
+  if (route === "forgot-password") return renderForgotPasswordPage();
   if (route === "account") return renderAccountPage();
   if (route === "track-order") return renderTrackOrderPage();
   if (route === "about") return renderInfoPage("من نحن", "طَيّة متجر عماني فاخر يركز على واجهة نظيفة، منتجات مختارة، وتجربة شراء بسيطة من أول زيارة حتى متابعة الطلب.");
@@ -398,7 +419,7 @@ function renderHomePage() {
   return `
     <section class="hero">
       <div class="hero__media">
-        <img src="${hero.image}" alt="${hero.title}">
+        <img src="${escapeAttr(hero.image)}" alt="${escapeAttr(hero.title)}">
       </div>
       <div class="hero__copy">
         <span class="eyebrow">طَيّة | متجر فاخر</span>
@@ -436,8 +457,8 @@ function renderCategoryTile(label, meta) {
   const product = PRODUCTS.find((item) => item.category === label) || PRODUCTS[0];
   return `
     <a class="category-tile" href="${meta.href}">
-      <img src="${product.image}" alt="${label}">
-      <strong>${label}</strong>
+      <img src="${escapeAttr(product.image)}" alt="${escapeAttr(label)}">
+      <strong>${escapeHtml(label)}</strong>
       <small>عرض المنتجات</small>
     </a>
   `;
@@ -487,14 +508,14 @@ function renderProductCard(product) {
   const inFav = state.favorites.includes(product.id);
   const inCompare = state.compare.includes(product.id);
   return `
-    <article class="product-card" data-product-card data-title="${escapeAttr(product.title)}" data-price="${product.price}" data-id="${product.id}">
+    <article class="product-card" data-product-card data-title="${escapeAttr(product.title)}" data-price="${product.price}" data-id="${escapeAttr(product.id)}">
       <a class="product-card__image" href="product.html?id=${encodeURIComponent(product.id)}">
-        <img src="${product.image}" alt="${product.title}">
-        <span>${product.badge}</span>
+        <img src="${escapeAttr(product.image)}" alt="${escapeAttr(product.title)}">
+        <span>${escapeHtml(product.badge)}</span>
       </a>
       <div class="product-card__body">
-        <a href="product.html?id=${encodeURIComponent(product.id)}"><h3>${product.title}</h3></a>
-        <p>${product.category}</p>
+        <a href="product.html?id=${encodeURIComponent(product.id)}"><h3>${escapeHtml(product.title)}</h3></a>
+        <p>${escapeHtml(product.category)}</p>
         <strong>${formatPrice(product.price)}</strong>
         <div class="product-actions">
           <button type="button" data-add-cart="${product.id}"><i class="fas fa-bag-shopping"></i> أضف للسلة</button>
@@ -512,16 +533,16 @@ function renderProductPage() {
   return `
     <section class="product-detail">
       <div class="product-detail__gallery">
-        <img src="${product.image}" alt="${product.title}">
+        <img src="${escapeAttr(product.image)}" alt="${escapeAttr(product.title)}">
       </div>
       <div class="product-detail__info">
-        <span class="eyebrow">${product.category}</span>
-        <h1>${product.title}</h1>
-        <p>${product.description}</p>
+        <span class="eyebrow">${escapeHtml(product.category)}</span>
+        <h1>${escapeHtml(product.title)}</h1>
+        <p>${escapeHtml(product.description)}</p>
         <div class="rating">★★★★★ <span>تقييم 4.8</span></div>
         <strong class="price">${formatPrice(product.price)}</strong>
-        <div class="option-row"><span>الخامة</span><b>${product.material}</b></div>
-        <div class="option-row"><span>اللون</span><b>${product.color}</b></div>
+        <div class="option-row"><span>الخامة</span><b>${escapeHtml(product.material)}</b></div>
+        <div class="option-row"><span>اللون</span><b>${escapeHtml(product.color)}</b></div>
         <div class="quantity-row">
           <button type="button" data-step-qty="-1">-</button>
           <input id="detail-qty" value="1" inputmode="numeric">
@@ -560,10 +581,10 @@ function renderCartPage() {
 function renderCartLine(line) {
   return `
     <article class="cart-line">
-      <img src="${line.product.image}" alt="${line.product.title}">
+      <img src="${escapeAttr(line.product.image)}" alt="${escapeAttr(line.product.title)}">
       <div>
-        <strong>${line.product.title}</strong>
-        <span>${line.product.category}</span>
+        <strong>${escapeHtml(line.product.title)}</strong>
+        <span>${escapeHtml(line.product.category)}</span>
       </div>
       <div class="cart-qty">
         <button type="button" data-cart-qty="${line.id}" data-delta="-1">-</button>
@@ -587,6 +608,12 @@ function renderCheckoutPage() {
         <input class="control" name="phone" placeholder="رقم الجوال" value="${escapeAttr(state.user?.phone || "")}" required>
         <input class="control" name="email" type="email" placeholder="البريد الإلكتروني" value="${escapeAttr(state.user?.email || "")}">
         <textarea class="control" name="address" placeholder="العنوان الكامل" required></textarea>
+        <div class="payment-methods">
+          <label><input type="radio" name="paymentMethod" value="visa" required> <span><i class="fab fa-cc-visa"></i> Visa</span></label>
+          <label><input type="radio" name="paymentMethod" value="mastercard"> <span><i class="fab fa-cc-mastercard"></i> Mastercard</span></label>
+          <label><input type="radio" name="paymentMethod" value="apple-pay"> <span><i class="fab fa-apple-pay"></i> Apple Pay</span></label>
+        </div>
+        <p class="secure-note">لا يتم إدخال بيانات البطاقة داخل الموقع. الدفع الحقيقي يتم عبر مزود دفع آمن عند ربط بوابة الدفع.</p>
         <button class="btn btn--primary" type="submit">تأكيد الطلب</button>
       </form>
       <aside class="order-summary">
@@ -620,6 +647,7 @@ function renderAuthShell(title, subtitle, mode) {
         <div class="social-login">
           <button type="button" data-provider-login="google"><i class="fab fa-google"></i> Google</button>
           <button type="button" data-provider-login="facebook"><i class="fab fa-facebook-f"></i> Facebook</button>
+          <button type="button" data-provider-login="apple"><i class="fab fa-apple"></i> Apple</button>
         </div>
         <div class="divider"><span>أو سجل دخولك من خلال</span></div>
         <form class="form-stack" id="${mode === "login" ? "login-form" : "register-form"}">
@@ -635,6 +663,24 @@ function renderAuthShell(title, subtitle, mode) {
           <button class="btn btn--light" type="submit"><i class="fas fa-mobile-screen"></i> الدخول برقم الجوال</button>
         </form>
         <a class="auth-switch" href="${mode === "login" ? "register.html" : "login.html"}">${mode === "login" ? "ليس لديك حساب؟ إنشاء حساب" : "لديك حساب؟ تسجيل الدخول"}</a>
+        ${mode === "login" ? '<a class="auth-switch" href="forgot-password.html">نسيت كلمة المرور؟</a>' : ""}
+      </div>
+    </section>
+  `;
+}
+
+function renderForgotPasswordPage() {
+  return `
+    <section class="auth-page">
+      <div class="auth-card">
+        <span class="auth-avatar"><i class="fas fa-key"></i></span>
+        <h1>استرجاع كلمة المرور</h1>
+        <p>أدخل بريدك وسيتم إرسال رابط آمن لإعادة تعيين كلمة المرور عبر Firebase.</p>
+        <form class="form-stack" id="forgot-password-form">
+          <input class="control" name="email" type="email" placeholder="البريد الإلكتروني" required>
+          <button class="btn btn--primary" type="submit">إرسال رابط الاسترجاع</button>
+        </form>
+        <a class="auth-switch" href="login.html">العودة لتسجيل الدخول</a>
       </div>
     </section>
   `;
@@ -706,7 +752,7 @@ function renderAddress(address, index) {
   return `
     <article class="saved-item">
       <i class="fas fa-location-dot"></i>
-      <div><strong>${address.label}</strong><span>${address.address}</span></div>
+      <div><strong>${escapeHtml(address.label)}</strong><span>${escapeHtml(address.address)}</span></div>
       <button type="button" data-remove-address="${index}">حذف</button>
     </article>
   `;
@@ -716,7 +762,7 @@ function renderOrder(order) {
   return `
     <article class="saved-item">
       <i class="fas fa-receipt"></i>
-      <div><strong>${order.number}</strong><span>${order.date} - ${order.status}</span></div>
+      <div><strong>${escapeHtml(order.number)}</strong><span>${escapeHtml(order.date)} - ${escapeHtml(order.status)}</span></div>
       <b>${formatPrice(order.total)}</b>
     </article>
   `;
@@ -840,6 +886,7 @@ function renderAdminPage() {
         ${renderAdminProductForm()}
         ${renderAdminProductsTable()}
       </div>
+      ${renderAdminOrdersPanel()}
       ${renderAdminAccessPanel()}
     </section>
   `;
@@ -855,6 +902,7 @@ function renderAdminLogin() {
         <div class="social-login">
           <button type="button" data-admin-provider-login="google"><i class="fab fa-google"></i> Google Admin</button>
           <button type="button" data-admin-provider-login="facebook"><i class="fab fa-facebook-f"></i> Facebook Admin</button>
+          <button type="button" data-admin-provider-login="apple"><i class="fab fa-apple"></i> Apple Admin</button>
         </div>
         <div class="divider"><span>أو عبر البريد وكلمة المرور</span></div>
         <form class="form-stack" id="admin-login-form">
@@ -900,9 +948,9 @@ function renderAdminProductsTable() {
   const adminProducts = remote.productsLoaded ? remote.products : [];
   const rows = adminProducts.map((product) => `
     <tr>
-      <td><img class="admin-thumb" src="${product.image}" alt="${escapeAttr(product.title)}"></td>
-      <td><strong>${product.title}</strong><small>${product.id}</small></td>
-      <td>${product.category}</td>
+      <td><img class="admin-thumb" src="${escapeAttr(product.image)}" alt="${escapeAttr(product.title)}"></td>
+      <td><strong>${escapeHtml(product.title)}</strong><small>${escapeHtml(product.id)}</small></td>
+      <td>${escapeHtml(product.category)}</td>
       <td>${formatPrice(product.price)}</td>
       <td class="admin-actions">
         <button type="button" data-admin-edit="${escapeAttr(product.id)}"><i class="fas fa-pen"></i> تعديل</button>
@@ -947,9 +995,9 @@ function renderAdminAccessPanel() {
     const isAdmin = adminIds.has(user.uid);
     return `
       <tr>
-        <td><strong>${user.name || "مستخدم"}</strong><small>${user.uid}</small></td>
-        <td>${user.email || "-"}</td>
-        <td>${user.phone || "-"}</td>
+        <td><strong>${escapeHtml(user.name || "مستخدم")}</strong><small>${escapeHtml(user.uid)}</small></td>
+        <td>${escapeHtml(user.email || "-")}</td>
+        <td>${escapeHtml(user.phone || "-")}</td>
         <td><span class="admin-badge ${isAdmin ? "is-admin" : ""}">${isAdmin ? "Admin" : "User"}</span></td>
         <td class="admin-actions">
           ${isAdmin ? "" : `<button type="button" data-admin-grant="${escapeAttr(user.uid)}"><i class="fas fa-user-shield"></i> منح صلاحية</button>`}
@@ -960,9 +1008,9 @@ function renderAdminAccessPanel() {
 
   const adminRows = admins.map((admin) => `
     <tr>
-      <td><strong>${admin.name || "مسؤول"}</strong><small>${admin.uid}</small></td>
-      <td>${admin.email || "-"}</td>
-      <td>${admin.grantedByEmail || "-"}</td>
+      <td><strong>${escapeHtml(admin.name || "مسؤول")}</strong><small>${escapeHtml(admin.uid)}</small></td>
+      <td>${escapeHtml(admin.email || "-")}</td>
+      <td>${escapeHtml(admin.grantedByEmail || "-")}</td>
       <td class="admin-actions">
         ${admin.uid === state.user?.uid ? '<span class="admin-note">حسابك الحالي</span>' : `<button type="button" data-admin-revoke="${escapeAttr(admin.uid)}"><i class="fas fa-user-minus"></i> سحب الصلاحية</button>`}
       </td>
@@ -1002,6 +1050,45 @@ function renderAdminAccessPanel() {
             </table>
           </div>
         </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderAdminOrdersPanel() {
+  const orders = remote.ordersLoaded ? remote.orders : [];
+  const rows = orders.map((order) => {
+    const customer = order.customer || {};
+    const message = `طلب جديد ${order.number || order.id} - ${customer.name || "عميل"} - ${formatPrice(order.total || 0)}`;
+    const mailHref = `mailto:support@tayya.com?subject=${encodeURIComponent("طلب جديد من طَيّة")}&body=${encodeURIComponent(message)}`;
+    const whatsappHref = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    return `
+      <tr>
+        <td><strong>${escapeHtml(order.number || order.id)}</strong><small>${escapeHtml(order.status || "-")}</small></td>
+        <td>${escapeHtml(customer.name || "-")}<small>${escapeHtml(customer.phone || customer.email || "")}</small></td>
+        <td>${escapeHtml(order.paymentMethod || "-")}<small>${escapeHtml(order.paymentStatus || "")}</small></td>
+        <td>${formatPrice(order.total || 0)}</td>
+        <td class="admin-actions">
+          <a href="${mailHref}"><i class="fas fa-envelope"></i> بريد</a>
+          <a href="${whatsappHref}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> واتساب</a>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+    <section class="panel admin-orders-panel">
+      <div class="panel__head">
+        <div>
+          <h2>الطلبات والإشعارات</h2>
+          <p>الطلبات تحفظ في Firestore فوراً. الإرسال التلقائي للبريد أو واتساب يحتاج Cloud Function أو مزود إشعارات.</p>
+        </div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>الطلب</th><th>العميل</th><th>الدفع</th><th>الإجمالي</th><th>إشعار</th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="5">لا توجد طلبات في Firestore بعد.</td></tr>'}</tbody>
+        </table>
       </div>
     </section>
   `;
@@ -1096,6 +1183,10 @@ function handleSubmit(event) {
     const code = String(new FormData(form).get("code") || "").trim();
     loginUser({ phone, code, provider: "phone" });
   }
+  if (form.id === "forgot-password-form") {
+    event.preventDefault();
+    resetPasswordFlow(String(new FormData(form).get("email") || "").trim());
+  }
   if (form.id === "admin-login-form") {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(form));
@@ -1141,7 +1232,7 @@ function handleSubmit(event) {
     const number = String(new FormData(form).get("number") || "").trim();
     const order = state.orders.find((item) => item.number === number);
     document.getElementById("track-result").innerHTML = order
-      ? `<div class="saved-item"><i class="fas fa-receipt"></i><div><strong>${order.number}</strong><span>${order.status}</span></div><b>${formatPrice(order.total)}</b></div>`
+      ? `<div class="saved-item"><i class="fas fa-receipt"></i><div><strong>${escapeHtml(order.number)}</strong><span>${escapeHtml(order.status)}</span></div><b>${formatPrice(order.total)}</b></div>`
       : `<p class="empty-card">لم نجد طلبًا بهذا الرقم.</p>`;
   }
 }
@@ -1175,6 +1266,7 @@ async function loginUser(data = {}) {
       let profile = null;
       if (data.provider === "google") profile = await remote.firebase.signInWithGoogle();
       if (data.provider === "facebook") profile = await remote.firebase.signInWithFacebook();
+      if (data.provider === "apple") profile = await remote.firebase.signInWithApple();
       if (data.provider === "email") {
         profile = data.mode === "register"
           ? await remote.firebase.registerWithEmail(data.email, data.password, data.name)
@@ -1233,11 +1325,30 @@ async function loginAdmin(data = {}) {
       ? await remote.firebase.signInWithGoogle()
       : data.provider === "facebook"
         ? await remote.firebase.signInWithFacebook()
-        : await remote.firebase.signInWithEmail(data.email, data.password);
+        : data.provider === "apple"
+          ? await remote.firebase.signInWithApple()
+          : await remote.firebase.signInWithEmail(data.email, data.password);
     state.user = profile;
     saveJson(STORAGE.user, profile);
     toast(profile.isAdmin ? "مرحباً بالمسؤول" : "تم الدخول، لكن هذا الحساب ليس Admin");
     renderApp();
+  } catch (error) {
+    console.error(error);
+    toast(getFirebaseErrorMessage(error), "error");
+  }
+}
+
+async function resetPasswordFlow(email) {
+  if (!email) return toast("أدخل البريد الإلكتروني.", "error");
+  if (!remote.configured || !remote.firebase) {
+    return toast("فعّل Firebase أولاً لإرسال رابط استرجاع كلمة المرور.", "error");
+  }
+  try {
+    await remote.firebase.resetPassword(email);
+    toast("تم إرسال رابط استرجاع كلمة المرور إلى بريدك.");
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 1200);
   } catch (error) {
     console.error(error);
     toast(getFirebaseErrorMessage(error), "error");
@@ -1358,16 +1469,36 @@ async function revokeAdminUser(uid) {
   }
 }
 
-function createOrder(data) {
+async function createOrder(data) {
   if (!state.cart.length) return toast("السلة فارغة", "error");
   const total = getCartTotal();
   const order = {
     number: `TY-${Math.floor(1000 + Math.random() * 9000)}`,
     date: new Date().toLocaleDateString("ar-OM"),
     status: "تم استلام الطلب",
+    paymentMethod: data.paymentMethod || "غير محدد",
+    paymentStatus: "بانتظار ربط بوابة الدفع",
     total: total + (total < FREE_SHIPPING ? 1.5 : 0),
-    customer: data
+    customer: data,
+    items: state.cart.map((line) => {
+      const product = getProduct(line.id);
+      return {
+        id: line.id,
+        title: product?.title || line.id,
+        price: product?.price || 0,
+        qty: line.qty
+      };
+    })
   };
+  if (remote.configured && remote.firebase) {
+    try {
+      const created = await remote.firebase.createOrder(order);
+      order.remoteId = created.id;
+    } catch (error) {
+      console.warn("Order notification sync failed", error);
+      toast("تم حفظ الطلب محلياً، لكن تعذر إرساله للوحة الإدارة.", "error");
+    }
+  }
   state.orders.unshift(order);
   state.cart = [];
   if (data.address) state.addresses.unshift({ label: "عنوان الطلب", address: data.address });
@@ -1468,6 +1599,8 @@ function getFirebaseErrorMessage(error) {
   if (code.includes("auth/invalid-credential") || code.includes("auth/wrong-password")) return "بيانات الدخول غير صحيحة.";
   if (code.includes("auth/user-not-found")) return "لا يوجد حساب بهذا البريد.";
   if (code.includes("auth/email-already-in-use")) return "هذا البريد مسجل مسبقاً.";
+  if (code.includes("auth/weak-password")) return "كلمة المرور ضعيفة. استخدم 6 أحرف على الأقل.";
+  if (code.includes("auth/operation-not-allowed")) return "طريقة الدخول غير مفعلة في Firebase Authentication.";
   if (code.includes("auth/invalid-phone-number")) return "رقم الجوال غير صحيح. استخدم الصيغة الدولية مثل +968.";
   if (code.includes("auth/invalid-verification-code")) return "رمز التحقق غير صحيح.";
   if (code.includes("permission-denied")) return "لا توجد صلاحية لتنفيذ هذه العملية. تحقق من Firestore Rules وصلاحية Admin.";
@@ -1489,6 +1622,15 @@ function saveJson(key, value) {
 
 function escapeAttr(value) {
   return String(value ?? "").replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function registerServiceWorker() {
